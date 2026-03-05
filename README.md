@@ -10,7 +10,7 @@
 
 <br>
 
-![NetOptimizer Pro Interface](Screenshot/1.png)
+![NetOptimizer Pro Interface](https://raw.githubusercontent.com/alisakkaf/NetOptimizer-Pro/main/Screenshot/1.png)
 
 </div>
 
@@ -62,13 +62,13 @@ Browsers like Chrome, Brave, and Edge often ignore standard service disabling. N
 Here is how the script operates smoothly under the hood with dynamic logging and clear status indicators:
 
 ### Deploying the Disable Protocol
-![Disabling Services](Screenshot/2.png)
+![Disabling Services](https://raw.githubusercontent.com/alisakkaf/NetOptimizer-Pro/main/Screenshot/2.png)
 
 ### Restoring Services to Default
-![Enabling Services](Screenshot/3.png)
+![Enabling Services](https://raw.githubusercontent.com/alisakkaf/NetOptimizer-Pro/main/Screenshot/3.png)
 
 ### Hunting & Eliminating Browser Updaters
-![Browser Updates Killed](Screenshot/4.png)
+![Browser Updates Killed](https://raw.githubusercontent.com/alisakkaf/NetOptimizer-Pro/main/Screenshot/4.png)
 
 ---
 
@@ -76,7 +76,7 @@ Here is how the script operates smoothly under the hood with dynamic logging and
 
 1. Go to the [Releases](../../releases) page and download the latest `NetOptimizer_Pro.bat` file.
 2. Right-click the downloaded file and select **"Run as Administrator"**. *(The script includes an auto-elevation check, but manual elevation is recommended).*
-3. Use the dynamic ANSI color menu to select your desired protocol by typing a number `[1-6]`.
+3. Select your desired protocol by typing a number `[1-6]`.
 4. Wait for the green `[✔] SUCCESS` message. 
 5. Restart your PC if recommended by the script.
 
