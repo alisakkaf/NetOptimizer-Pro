@@ -10,7 +10,7 @@
 
 <br>
 
-![NetOptimizer Pro Interface](https://raw.githubusercontent.com/alisakkaf/NetOptimizer-Pro/main/Screenshot/1.png)
+![NetOptimizer Pro Interface](https://i.ibb.co/G3shrTwx/1.png)
 
 </div>
 
@@ -59,16 +59,9 @@ Browsers like Chrome, Brave, and Edge often ignore standard service disabling. N
 
 ## 📸 Action Showcase
 
-Here is how the script operates smoothly under the hood with dynamic logging and clear status indicators:
-
-### Deploying the Disable Protocol
-![Disabling Services](https://raw.githubusercontent.com/alisakkaf/NetOptimizer-Pro/main/Screenshot/2.png)
-
-### Restoring Services to Default
-![Enabling Services](https://raw.githubusercontent.com/alisakkaf/NetOptimizer-Pro/main/Screenshot/3.png)
-
-### Hunting & Eliminating Browser Updaters
-![Browser Updates Killed](https://raw.githubusercontent.com/alisakkaf/NetOptimizer-Pro/main/Screenshot/4.png)
+![Disabling Services](https://i.ibb.co/mCj7KQnK/2.png)
+![Enabling Services](https://i.ibb.co/mCz7sdJ0/3.png)
+![Browser Updates Killed](https://i.ibb.co/FLV3RXns/4.png)
 
 ---
 
@@ -94,6 +87,6 @@ This is an aggressive system script. By using this tool, you acknowledge and agr
 
 <div align="center">
   
-**Made By Ali Sakkaf**
+**Made By Ali Sakkaf** ❤️
 
 </div>
