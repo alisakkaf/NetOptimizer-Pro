@@ -46,9 +46,9 @@ echo %C_RED%  ★%C_CYA%   ╚═╝  ╚═╝╚══════╝╚═╝
 echo %C_RED%  ★                                                                          ★%C_RST%
 echo %C_RED%  ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★%C_RST%
 echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
-echo %C_WHT%   ║%C_YEL%              ⚡ ULTIMATE NETWORK ^& UPDATE SERVICES KILLER ⚡           %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_GRN%                    Developed By: A L I  S A K K A F                    %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_WHT%                   GitHub User: github.com/alisakkaf                    %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_YEL%              ⚡ ULTIMATE NETWORK ^& UPDATE SERVICES KILLER ⚡             %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_GRN%                    Developed By: A L I  S A K K A F                     %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_WHT%                    GitHub User: github.com/alisakkaf                     %C_WHT%║%C_RST%
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
 echo.
 echo %C_WHT%   [ SYSTEM NETWORK CONTROL ]%C_RST%
@@ -213,9 +213,15 @@ echo %C_WHT%   ╚════════════════════�
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_RED%[KILL]%C_RST% Hunting ^& Terminating Active Updater Processes in RAM...
-for %%P in (GoogleUpdate.exe BraveUpdate.exe MicrosoftEdgeUpdate.exe maintenanceservice.exe opera_autoupdate.exe updater.exe) do (
-    taskkill /F /IM %%P /T >nul 2>&1
-)
+:: Core Updaters
+for %%P in (GoogleUpdate.exe BraveUpdate.exe MicrosoftEdgeUpdate.exe maintenanceservice.exe opera_autoupdate.exe updater.exe) do ( taskkill /F /IM %%P /T >nul 2>&1 )
+:: Brave Handlers
+for %%P in (BraveUpdateOnDemand.exe BraveCrashHandler.exe BraveCrashHandler64.exe BraveCrashHandlerArm64.exe BraveUpdateBroker.exe BraveUpdateComRegisterShell64.exe BraveUpdateComRegisterShellArm64.exe BraveUpdateCore.exe) do ( taskkill /F /IM %%P /T >nul 2>&1 )
+:: Chrome Remoting & Handlers
+for %%P in (remoting_crashpad_handler.exe remoting_native_messaging_host.exe remote_assistance_host_uiaccess.exe remote_open_url.exe remote_assistance_host.exe remote_security_key.exe remoting_start_host.exe remote_webauthn.exe remoting_desktop.exe remoting_host.exe) do ( taskkill /F /IM %%P /T >nul 2>&1 )
+:: Edge Helpers & Copilot
+for %%P in (elevated_tracing_service.exe mscopilot.exe elevation_service.exe msedge_pwa_launcher.exe passkey_authenticator_plugin.exe notification_helper.exe notification_click_helper.exe msedge_proxy.exe identity_helper.exe pwahelper.exe ie_to_edge_stub.exe cookie_exporter.exe copilot_setup.exe) do ( taskkill /F /IM %%P /T >nul 2>&1 )
+
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% All Ghost Processes Eliminated.
 echo.
 
