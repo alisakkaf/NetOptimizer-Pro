@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 :: Full Support for UTF-8
 chcp 65001 >nul
-title NetOptimizer Pro v2.3 - By ALI SAKKAF
+title NetOptimizer Pro v2.5 - By ALI SAKKAF
 
 :: ==========================================
 :: ANSI COLOR ENGINE
@@ -32,6 +32,70 @@ if %errorlevel% NEQ 0 (
     exit /b
 )
 
+
+:: ==========================================
+:: AUTO-UPDATE ENGINE (PRO)
+:: ==========================================
+set "CURRENT_VERSION=2.5"
+set "SCRIPT_NAME=NetOptimizer_Pro.bat"
+set "PASTEBIN_URL=https://pastebin.com/raw/uKR3Lvhg"
+set "PS_TLS=[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;"
+
+echo.
+echo %C_CYA%  [☁] Checking for updates... (Timeout in 10s)%C_RST%
+
+:: Start the check in a background process to prevent hanging
+set "LATEST_VERSION="
+for /f "delims=" %%V in ('powershell -NoProfile -Command "Start-Job -ScriptBlock { !PS_TLS! try { (Invoke-RestMethod -Uri '%PASTEBIN_URL%').ToString().Trim() } catch { $null } } | Wait-Job -Timeout 10 | Receive-Job" 2^>nul') do set "LATEST_VERSION=%%V"
+
+if "!LATEST_VERSION!"=="" (
+    echo %C_RED%  [!] Update check timed out or failed. Skipping...%C_RST%
+    timeout /t 2 >nul
+    goto MENU
+)
+
+if "!LATEST_VERSION!"=="!CURRENT_VERSION!" (
+    echo %C_GRN%  [✔] You are using the latest version ^(v!CURRENT_VERSION!^).%C_RST%
+    timeout /t 2 >nul
+    goto MENU
+)
+
+:: If a new version is found
+echo %C_GRN%  [+] New Update Found: v!LATEST_VERSION!%C_RST%
+echo %C_WHT%  [*] Downloading... (Timeout in 10s)%C_RST%
+
+set "DOWNLOAD_URL=https://github.com/alisakkaf/NetOptimizer-Pro/releases/download/v!LATEST_VERSION!/!SCRIPT_NAME!"
+
+:: Smart Download Engine with Max 10s timeout
+if exist "%SystemRoot%\System32\curl.exe" (
+    curl.exe -# -m 10 -L -o "!SCRIPT_NAME!.tmp" "!DOWNLOAD_URL!"
+) else (
+    powershell -NoProfile -Command "!PS_TLS! try { $wc = New-Object Net.WebClient; $wc.DownloadFile('!DOWNLOAD_URL!', '$PWD\!SCRIPT_NAME!.tmp') } catch { exit }" 2>nul
+)
+
+:: Verification and Execution
+if exist "!SCRIPT_NAME!.tmp" (
+    :: Corrupt File Check (Prevents overwriting with 0-byte or 404 error page)
+    for %%F in ("!SCRIPT_NAME!.tmp") do if %%~zF LSS 100 (
+        del /f /q "!SCRIPT_NAME!.tmp" >nul 2>&1
+        echo %C_RED%  [!] Downloaded file is corrupted. Going to Menu...%C_RST%
+        timeout /t 2 >nul
+        goto MENU
+    )
+    
+    echo.
+    for /l %%N in (5,-1,1) do (
+        <nul set /p "=%ESC%[2K%ESC%[G%C_YEL%  [✔] Downloaded! Restarting in %%N seconds...%C_RST%"
+        ping 127.0.0.1 -n 2 >nul
+    )
+    (echo @echo off & echo timeout /t 1 ^>nul & echo move /y "!SCRIPT_NAME!.tmp" "%~nx0" ^>nul & echo start "" "%~nx0" & echo del "%%~f0") > "updater.bat"
+    start "" /min "updater.bat" & exit /b
+) else (
+    echo %C_RED%  [!] Download failed. Going to Menu...%C_RST%
+    timeout /t 2 >nul
+    goto MENU
+)
+
 :MENU
 cls
 echo.
@@ -56,24 +120,26 @@ echo %C_GRY%   -----------------------------------------------------------------
 echo   %C_CYA%[1]%C_RST% %C_RED%🛑%C_RST% Disable ALL Network-Hungry Services %C_YEL%(Max Performance / No Leaks)%C_RST%
 echo   %C_CYA%[2]%C_RST% %C_GRN%🟢%C_RST% Restore ALL Windows Services to Default State
 echo   %C_CYA%[3]%C_RST% %C_BLU%🔄%C_RST% Enable Windows Update ^& Phone Link ONLY
+echo   %C_CYA%[4]%C_RST% %C_BLU%🛍️%C_RST% Enable Microsoft Store Services ONLY
 echo.
 echo %C_WHT%   [ BROWSERS AUTO-UPDATE CONTROL ]%C_RST%
 echo %C_GRY%   ----------------------------------------------------------------------%C_RST%
-echo   %C_CYA%[4]%C_RST% %C_YEL%⏸️%C_RST% Temporary Pause: Kill active updaters %C_YEL%(Restores on reboot)%C_RST%
-echo   %C_CYA%[5]%C_RST% %C_RED%❌%C_RST% Permanent Block: Hard Kill ^& Disable Services/GPO
-echo   %C_CYA%[6]%C_RST% %C_GRN%✅%C_RST% Restore Defaults: Enable all browser updates
+echo   %C_CYA%[5]%C_RST% %C_YEL%⏸️%C_RST% Temporary Pause: Kill active updaters %C_YEL%(Restores on reboot)%C_RST%
+echo   %C_CYA%[6]%C_RST% %C_RED%❌%C_RST% Permanent Block: Hard Kill ^& Disable Services/GPO
+echo   %C_CYA%[7]%C_RST% %C_GRN%✅%C_RST% Restore Defaults: Enable all browser updates
 echo.
-echo   %C_GRY%[7] 🚪 Exit Application%C_RST%
+echo   %C_GRY%[8] 🚪 Exit Application%C_RST%
 echo.
-set /p choice="   %C_YEL%>> Select an execution protocol [1-7]: %C_RST%"
+set /p choice="   %C_YEL%>> Select an execution protocol [1-8]: %C_RST%"
 
 if "%choice%"=="1" goto DISABLE
 if "%choice%"=="2" goto ENABLE
 if "%choice%"=="3" goto ENABLE_WU
-if "%choice%"=="4" goto DISABLE_BROWSERS_TEMP
-if "%choice%"=="5" goto DISABLE_BROWSERS_PERM
-if "%choice%"=="6" goto ENABLE_BROWSERS
-if "%choice%"=="7" exit
+if "%choice%"=="4" goto ENABLE_STORE
+if "%choice%"=="5" goto DISABLE_BROWSERS_TEMP
+if "%choice%"=="6" goto DISABLE_BROWSERS_PERM
+if "%choice%"=="7" goto ENABLE_BROWSERS
+if "%choice%"=="8" exit
 goto MENU
 
 :: ==========================================
@@ -196,7 +262,32 @@ pause
 goto MENU
 
 :: ==========================================
-:: [4] TEMPORARY PAUSE BROWSERS UPDATES
+:: [4] ENABLE MICROSOFT STORE ONLY
+:: ==========================================
+:ENABLE_STORE
+cls
+echo.
+echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
+echo %C_WHT%   ║ %C_BLU%[*] ACTIVATING MICROSOFT STORE ^& APP INSTALLATION SERVICES...          %C_WHT%║%C_RST%
+echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
+echo.
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-configuring Store licensing and deployment services...
+for %%S in (wuauserv bits InstallService ClipSVC AppXSVC PushToInstall) do (
+    sc config %%S start= demand >nul 2>&1
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Starting Store services...
+for %%S in (bits wuauserv InstallService ClipSVC AppXSVC) do (
+    net start %%S >nul 2>&1
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Microsoft Store is now Operational.
+echo.
+echo %C_GRN%   [✔] SUCCESS: YOU CAN NOW DOWNLOAD AND INSTALL APPS FROM THE STORE.%C_RST%
+echo.
+pause
+goto MENU
+
+:: ==========================================
+:: [5] TEMPORARY PAUSE BROWSERS UPDATES
 :: ==========================================
 :DISABLE_BROWSERS_TEMP
 cls
@@ -224,7 +315,7 @@ pause
 goto MENU
 
 :: ==========================================
-:: [5] PERMANENT DISABLE BROWSERS UPDATES
+:: [6] PERMANENT DISABLE BROWSERS UPDATES
 :: ==========================================
 :DISABLE_BROWSERS_PERM
 cls
@@ -267,7 +358,7 @@ pause
 goto MENU
 
 :: ==========================================
-:: [6] ENABLE BROWSERS UPDATES
+:: [7] ENABLE BROWSERS UPDATES
 :: ==========================================
 :ENABLE_BROWSERS
 cls

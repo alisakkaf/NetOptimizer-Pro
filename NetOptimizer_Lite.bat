@@ -1,22 +1,107 @@
 @echo off
 setlocal EnableDelayedExpansion
-title NetOptimizer Lite v2.4 - By ALI SAKKAF
+title NetOptimizer Lite v2.5 - By ALI SAKKAF
 
 :: ==========================================
 :: ADMINISTRATOR PRIVILEGES CHECK
 :: ==========================================
 net session >nul 2>&1
-if %errorlevel% NEQ 0 (
-    echo.
-    echo [!] ERROR: This script requires Administrator privileges.
-    echo [*] Requesting elevation... please wait.
-    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
-    echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
-    "%temp%\getadmin.vbs"
-    del "%temp%\getadmin.vbs"
-    exit /b
-)
+if %errorlevel% EQU 0 goto ADMIN_OK
 
+echo.
+echo [!] ERROR: This script requires Administrator privileges.
+echo [*] Requesting elevation... please wait.
+echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
+"%temp%\getadmin.vbs"
+del "%temp%\getadmin.vbs"
+exit /b
+
+:ADMIN_OK
+:: ==========================================
+:: AUTO-UPDATE ENGINE (LITE) 
+:: ==========================================
+set "CURRENT_VERSION=2.5"
+set "SCRIPT_NAME=NetOptimizer_Lite.bat"
+set "PASTEBIN_URL=https://pastebin.com/raw/uKR3Lvhg"
+
+echo.
+echo [*] Checking for updates... (Timeout in 5s)
+
+:: Create a temporary PS1 file to completely isolate CMD from PowerShell brackets/dots
+set "PS_CHECK=%temp%\check_update.ps1"
+echo $ErrorActionPreference='SilentlyContinue'; > "!PS_CHECK!"
+echo [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; >> "!PS_CHECK!"
+echo $req=[System.Net.WebRequest]::Create('%PASTEBIN_URL%'); >> "!PS_CHECK!"
+echo $req.Timeout=5000; >> "!PS_CHECK!"
+echo $res=$req.GetResponse(); >> "!PS_CHECK!"
+echo $sr=New-Object System.IO.StreamReader($res.GetResponseStream()); >> "!PS_CHECK!"
+echo $sr.ReadToEnd().Trim(); >> "!PS_CHECK!"
+
+set "LATEST_VERSION="
+for /f "delims=" %%V in ('powershell -NoProfile -ExecutionPolicy Bypass -File "!PS_CHECK!" 2^>nul') do set "LATEST_VERSION=%%V"
+del "!PS_CHECK!" >nul 2>&1
+
+:: Fail-safe routing (No brackets used in IF statements to prevent ANY crashes)
+if "!LATEST_VERSION!"=="" goto UPDATE_FAILED
+if "!LATEST_VERSION!"=="!CURRENT_VERSION!" goto UPDATE_LATEST
+goto UPDATE_FOUND
+
+:UPDATE_FAILED
+echo [!] Server unreachable or check timed out. Proceeding to menu...
+timeout /t 2 >nul
+goto MENU
+
+:UPDATE_LATEST
+echo [SUCCESS] Your version is up to date (v!CURRENT_VERSION!).
+timeout /t 2 >nul
+goto MENU
+
+:UPDATE_FOUND
+echo [+] New Update Found: v!LATEST_VERSION! [Current: v!CURRENT_VERSION!]
+echo [*] Downloading... (Timeout in 10s)
+echo.
+
+set "DOWNLOAD_URL=https://github.com/alisakkaf/NetOptimizer-Pro/releases/download/v!LATEST_VERSION!/!SCRIPT_NAME!"
+
+if exist "%SystemRoot%\System32\curl.exe" goto DL_CURL
+goto DL_PS
+
+:DL_CURL
+curl.exe -# -m 10 -L -o "!SCRIPT_NAME!.tmp" "!DOWNLOAD_URL!" 2>nul
+goto DL_VERIFY
+
+:DL_PS
+set "PS_DL=%temp%\dl_update.ps1"
+echo $ErrorActionPreference='SilentlyContinue'; > "!PS_DL!"
+echo [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; >> "!PS_DL!"
+echo (New-Object Net.WebClient).DownloadFile('!DOWNLOAD_URL!', '!SCRIPT_NAME!.tmp'); >> "!PS_DL!"
+powershell -NoProfile -ExecutionPolicy Bypass -File "!PS_DL!" 2>nul
+del "!PS_DL!" >nul 2>&1
+goto DL_VERIFY
+
+:DL_VERIFY
+if exist "!SCRIPT_NAME!.tmp" goto DL_SUCCESS
+echo [!] Download failed or timed out. Returning to menu...
+timeout /t 2 >nul
+goto MENU
+
+:DL_SUCCESS
+echo [SUCCESS] Update Downloaded! Restarting script in 5 seconds...
+timeout /t 5 >nul
+
+echo @echo off> "updater.bat"
+echo timeout /t 1 ^>nul>> "updater.bat"
+echo move /y "!SCRIPT_NAME!.tmp" "%~nx0" ^>nul>> "updater.bat"
+echo start "" "%~nx0">> "updater.bat"
+echo del "%%~f0">> "updater.bat"
+
+start "" /min "updater.bat"
+exit /b
+
+:: ==========================================
+:: MAIN INTERFACE
+:: ==========================================
 :MENU
 cls
 echo.
@@ -28,27 +113,29 @@ echo ===========================================================================
 echo.
 echo [ SYSTEM NETWORK CONTROL ]
 echo ------------------------------------------------------------------------------
-echo   [1] Disable ALL Network-Hungry Services (Max Performance)
-echo   [2] Restore ALL Windows Services to Default State
-echo   [3] Enable Windows Update ^& Phone Link ONLY
+echo    [1] Disable ALL Network-Hungry Services (Max Performance)
+echo    [2] Restore ALL Windows Services to Default State
+echo    [3] Enable Windows Update ^& Phone Link ONLY
+echo    [4] Enable Microsoft Store Services ONLY
 echo.
 echo [ BROWSERS AUTO-UPDATE CONTROL ]
 echo ------------------------------------------------------------------------------
-echo   [4] Temporary Pause: Kill active updaters (Restores on reboot)
-echo   [5] Permanent Block: Hard Kill ^& Disable Services/GPO
-echo   [6] Restore Defaults: Enable all browser updates
+echo    [5] Temporary Pause: Kill active updaters (Restores on reboot)
+echo    [6] Permanent Block: Hard Kill ^& Disable Services/GPO
+echo    [7] Restore Defaults: Enable all browser updates
 echo.
-echo   [7] Exit Application
+echo    [8] Exit Application
 echo.
-set /p choice=" >> Select an option [1-7]: "
+set /p choice=" >> Select an option [1-8]: "
 
 if "%choice%"=="1" goto DISABLE
 if "%choice%"=="2" goto ENABLE
 if "%choice%"=="3" goto ENABLE_WU
-if "%choice%"=="4" goto DISABLE_BROWSERS_TEMP
-if "%choice%"=="5" goto DISABLE_BROWSERS_PERM
-if "%choice%"=="6" goto ENABLE_BROWSERS
-if "%choice%"=="7" exit
+if "%choice%"=="4" goto ENABLE_STORE
+if "%choice%"=="5" goto DISABLE_BROWSERS_TEMP
+if "%choice%"=="6" goto DISABLE_BROWSERS_PERM
+if "%choice%"=="7" goto ENABLE_BROWSERS
+if "%choice%"=="8" exit
 goto MENU
 
 :: ==========================================
@@ -171,7 +258,32 @@ pause
 goto MENU
 
 :: ==========================================
-:: [4] TEMPORARY PAUSE BROWSERS UPDATES
+:: [4] ENABLE MICROSOFT STORE ONLY
+:: ==========================================
+:ENABLE_STORE
+cls
+echo.
+echo ==============================================================================
+echo [*] ACTIVATING MICROSOFT STORE ^& APP INSTALLATION SERVICES...
+echo ==============================================================================
+echo.
+echo [INFO] Re-configuring Store licensing and deployment services...
+for %%S in (wuauserv bits InstallService ClipSVC AppXSVC PushToInstall) do (
+    sc config %%S start= demand >nul 2>&1
+)
+echo [INFO] Starting Store services...
+for %%S in (bits wuauserv InstallService ClipSVC AppXSVC) do (
+    net start %%S >nul 2>&1
+)
+echo [+] DONE.
+echo.
+echo [ SUCCESS ] YOU CAN NOW DOWNLOAD AND INSTALL APPS FROM THE STORE.
+echo.
+pause
+goto MENU
+
+:: ==========================================
+:: [5] TEMPORARY PAUSE BROWSERS UPDATES
 :: ==========================================
 :DISABLE_BROWSERS_TEMP
 cls
@@ -199,7 +311,7 @@ pause
 goto MENU
 
 :: ==========================================
-:: [5] PERMANENT DISABLE BROWSERS UPDATES
+:: [6] PERMANENT DISABLE BROWSERS UPDATES
 :: ==========================================
 :DISABLE_BROWSERS_PERM
 cls
@@ -242,7 +354,7 @@ pause
 goto MENU
 
 :: ==========================================
-:: [6] ENABLE BROWSERS UPDATES
+:: [7] ENABLE BROWSERS UPDATES
 :: ==========================================
 :ENABLE_BROWSERS
 cls
