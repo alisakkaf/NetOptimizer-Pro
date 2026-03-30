@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 :: Full Support for UTF-8
 chcp 65001 >nul
-title NetOptimizer Pro v2.5 - By ALI SAKKAF
+title NetOptimizer Pro v2.6 - By ALI SAKKAF
 
 :: ==========================================
 :: ANSI COLOR ENGINE
@@ -32,24 +32,22 @@ if %errorlevel% NEQ 0 (
     exit /b
 )
 
-
 :: ==========================================
 :: AUTO-UPDATE ENGINE (PRO)
 :: ==========================================
-set "CURRENT_VERSION=2.5"
+set "CURRENT_VERSION=2.6"
 set "SCRIPT_NAME=NetOptimizer_Pro.bat"
 set "PASTEBIN_URL=https://pastebin.com/raw/uKR3Lvhg"
 set "PS_TLS=[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;"
 
 echo.
-echo %C_CYA%  [☁] Checking for updates... (Timeout in 10s)%C_RST%
+echo %C_CYA%  [☁] Checking for updates... (Timeout in 5s)%C_RST%
 
-:: Start the check in a background process to prevent hanging
 set "LATEST_VERSION="
-for /f "delims=" %%V in ('powershell -NoProfile -Command "Start-Job -ScriptBlock { !PS_TLS! try { (Invoke-RestMethod -Uri '%PASTEBIN_URL%').ToString().Trim() } catch { $null } } | Wait-Job -Timeout 10 | Receive-Job" 2^>nul') do set "LATEST_VERSION=%%V"
+for /f "delims=" %%V in ('powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; (Invoke-RestMethod -Uri '%PASTEBIN_URL%' -TimeoutSec 5).ToString().Trim()" 2^>nul') do set "LATEST_VERSION=%%V"
 
 if "!LATEST_VERSION!"=="" (
-    echo %C_RED%  [!] Update check timed out or failed. Skipping...%C_RST%
+    echo %C_RED%  [!] Server unreachable or check timed out. Proceeding to menu...%C_RST%
     timeout /t 2 >nul
     goto MENU
 )
@@ -60,22 +58,18 @@ if "!LATEST_VERSION!"=="!CURRENT_VERSION!" (
     goto MENU
 )
 
-:: If a new version is found
-echo %C_GRN%  [+] New Update Found: v!LATEST_VERSION!%C_RST%
+echo %C_GRN%  [+] New Update Found: v!LATEST_VERSION! %C_YEL%[Current: v!CURRENT_VERSION!]%C_RST%
 echo %C_WHT%  [*] Downloading... (Timeout in 10s)%C_RST%
 
 set "DOWNLOAD_URL=https://github.com/alisakkaf/NetOptimizer-Pro/releases/download/v!LATEST_VERSION!/!SCRIPT_NAME!"
 
-:: Smart Download Engine with Max 10s timeout
 if exist "%SystemRoot%\System32\curl.exe" (
-    curl.exe -# -m 10 -L -o "!SCRIPT_NAME!.tmp" "!DOWNLOAD_URL!"
+    curl.exe -# -m 10 -L -o "!SCRIPT_NAME!.tmp" "!DOWNLOAD_URL!" 2>nul
 ) else (
-    powershell -NoProfile -Command "!PS_TLS! try { $wc = New-Object Net.WebClient; $wc.DownloadFile('!DOWNLOAD_URL!', '$PWD\!SCRIPT_NAME!.tmp') } catch { exit }" 2>nul
+    powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('!DOWNLOAD_URL!', '!SCRIPT_NAME!.tmp')" 2>nul
 )
 
-:: Verification and Execution
 if exist "!SCRIPT_NAME!.tmp" (
-    :: Corrupt File Check (Prevents overwriting with 0-byte or 404 error page)
     for %%F in ("!SCRIPT_NAME!.tmp") do if %%~zF LSS 100 (
         del /f /q "!SCRIPT_NAME!.tmp" >nul 2>&1
         echo %C_RED%  [!] Downloaded file is corrupted. Going to Menu...%C_RST%
@@ -119,13 +113,13 @@ echo %C_WHT%   [ SYSTEM NETWORK CONTROL ]%C_RST%
 echo %C_GRY%   ----------------------------------------------------------------------%C_RST%
 echo   %C_CYA%[1]%C_RST% %C_RED%🛑%C_RST% Disable ALL Network-Hungry Services %C_YEL%(Max Performance / No Leaks)%C_RST%
 echo   %C_CYA%[2]%C_RST% %C_GRN%🟢%C_RST% Restore ALL Windows Services to Default State
-echo   %C_CYA%[3]%C_RST% %C_BLU%🔄%C_RST% Enable Windows Update ^& Phone Link ONLY
-echo   %C_CYA%[4]%C_RST% %C_BLU%🛍️%C_RST% Enable Microsoft Store Services ONLY
+echo   %C_CYA%[3]%C_RST% %C_BLU%🔄%C_RST% Enable Windows Update ^& Store Services ONLY
+echo   %C_CYA%[4]%C_RST% %C_BLU%📱%C_RST% Enable Microsoft Phone Link Services ONLY
 echo.
 echo %C_WHT%   [ BROWSERS AUTO-UPDATE CONTROL ]%C_RST%
 echo %C_GRY%   ----------------------------------------------------------------------%C_RST%
 echo   %C_CYA%[5]%C_RST% %C_YEL%⏸️%C_RST% Temporary Pause: Kill active updaters %C_YEL%(Restores on reboot)%C_RST%
-echo   %C_CYA%[6]%C_RST% %C_RED%❌%C_RST% Permanent Block: Hard Kill ^& Disable Services/GPO
+echo   %C_CYA%[6]%C_RST% %C_RED%❌%C_RST% Permanent Block: Hard Kill, Disable Services, GPO ^& IFEO Locks
 echo   %C_CYA%[7]%C_RST% %C_GRN%✅%C_RST% Restore Defaults: Enable all browser updates
 echo.
 echo   %C_GRY%[8] 🚪 Exit Application%C_RST%
@@ -134,8 +128,8 @@ set /p choice="   %C_YEL%>> Select an execution protocol [1-8]: %C_RST%"
 
 if "%choice%"=="1" goto DISABLE
 if "%choice%"=="2" goto ENABLE
-if "%choice%"=="3" goto ENABLE_WU
-if "%choice%"=="4" goto ENABLE_STORE
+if "%choice%"=="3" goto ENABLE_WU_STORE
+if "%choice%"=="4" goto ENABLE_PHONE_LINK
 if "%choice%"=="5" goto DISABLE_BROWSERS_TEMP
 if "%choice%"=="6" goto DISABLE_BROWSERS_PERM
 if "%choice%"=="7" goto ENABLE_BROWSERS
@@ -154,7 +148,7 @@ echo %C_WHT%   ╚════════════════════�
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_RED%[KILL]%C_RST% Terminating Resource-Heavy Background UI ^& Telemetry Processes...
-for %%P in (msedgewebview2.exe OneDrive.exe Widgets.exe CompatTelRunner.exe DeviceCensus.exe software_reporter_tool.exe gamebarpresencewriter.exe) do ( taskkill /F /IM %%P /T >nul 2>&1 )
+for %%P in (msedgewebview2.exe OneDrive.exe Widgets.exe CompatTelRunner.exe DeviceCensus.exe software_reporter_tool.exe gamebarpresencewriter.exe PhoneExperienceHost.exe) do ( taskkill /F /IM %%P /T >nul 2>&1 )
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Telemetry ^& Background UI Engines Terminated.
 echo.
 
@@ -164,12 +158,12 @@ echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Update Engine Halted.
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Stopping Telemetry, Sync, Error Reporting ^& App Store Services...
-for %%S in (DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks) do ( net stop %%S /y >nul 2>&1 )
+for %%S in (DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks BcastDVRUserService BluetoothUserService) do ( net stop %%S /y >nul 2>&1 )
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Background Data Services Halted.
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Permanently Disabling Services from Auto-Start...
-for %%S in (wuauserv bits dosvc UsoSvc DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks) do (
+for %%S in (wuauserv bits dosvc UsoSvc DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks BcastDVRUserService BluetoothUserService) do (
     sc config %%S start= disabled >nul 2>&1
 )
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v Start /t REG_DWORD /d 4 /f >nul 2>&1
@@ -212,7 +206,7 @@ echo %C_WHT%   ╚════════════════════�
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Restoring Service Startup Types...
-for %%S in (wuauserv bits dosvc UsoSvc DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks) do (
+for %%S in (wuauserv bits dosvc UsoSvc DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks BcastDVRUserService BluetoothUserService) do (
     sc config %%S start= demand >nul 2>&1
 )
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v Start /t REG_DWORD /d 3 /f >nul 2>&1
@@ -237,51 +231,56 @@ pause
 goto MENU
 
 :: ==========================================
-:: [3] ENABLE WINDOWS UPDATE ONLY
+:: [3] ENABLE WINDOWS UPDATE & STORE ONLY
 :: ==========================================
-:ENABLE_WU
+:ENABLE_WU_STORE
 cls
 echo.
 echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
-echo %C_WHT%   ║ %C_BLU%[*] ACTIVATING WINDOWS UPDATE ^& PHONE LINK SERVICES...                 %C_WHT%║%C_RST%
+echo %C_WHT%   ║ %C_BLU%[*] ACTIVATING WINDOWS UPDATE ^& MICROSOFT STORE SERVICES...            %C_WHT%║%C_RST%
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
 echo.
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-configuring essential services...
-sc config bits start= demand >nul 2>&1
-sc config wuauserv start= demand >nul 2>&1
-sc config PhoneSvc start= demand >nul 2>&1
+for %%S in (wuauserv bits InstallService ClipSVC AppXSVC PushToInstall) do (
+    sc config %%S start= demand >nul 2>&1
+)
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Starting services...
-net start bits >nul 2>&1
-net start wuauserv >nul 2>&1
-net start PhoneSvc >nul 2>&1
-echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Windows Update ^& Phone Link are Operational.
+for %%S in (bits wuauserv InstallService ClipSVC AppXSVC) do (
+    net start %%S >nul 2>&1
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Windows Update ^& Store are Operational.
 echo.
-echo %C_GRN%   [✔] SUCCESS: YOU CAN NOW CHECK FOR UPDATES AND USE PHONE LINK.%C_RST%
+echo %C_GRN%   [✔] SUCCESS: YOU CAN NOW CHECK FOR UPDATES AND USE THE STORE.%C_RST%
 echo.
 pause
 goto MENU
 
 :: ==========================================
-:: [4] ENABLE MICROSOFT STORE ONLY
+:: [4] ENABLE MICROSOFT PHONE LINK ONLY
 :: ==========================================
-:ENABLE_STORE
+:ENABLE_PHONE_LINK
 cls
 echo.
 echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
-echo %C_WHT%   ║ %C_BLU%[*] ACTIVATING MICROSOFT STORE ^& APP INSTALLATION SERVICES...          %C_WHT%║%C_RST%
+echo %C_WHT%   ║ %C_BLU%[*] ACTIVATING MICROSOFT PHONE LINK SERVICES...                        %C_WHT%║%C_RST%
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
 echo.
-echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-configuring Store licensing and deployment services...
-for %%S in (wuauserv bits InstallService ClipSVC AppXSVC PushToInstall) do (
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-configuring Phone Link, Network Broker, and Push Notifications...
+:: Essential background services for UWP Phone Link sync
+for %%S in (PhoneSvc BcastDVRUserService BluetoothUserService NcbService WpnService) do (
     sc config %%S start= demand >nul 2>&1
 )
-echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Starting Store services...
-for %%S in (bits wuauserv InstallService ClipSVC AppXSVC) do (
+:: Enabling background app execution for Phone Link via Registry
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications\Microsoft.YourPhone_8wekyb3d8bbwe" /v Disabled /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications\Microsoft.YourPhone_8wekyb3d8bbwe" /v DisabledByUser /t REG_DWORD /d 0 /f >nul 2>&1
+
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Starting services...
+for %%S in (NcbService WpnService PhoneSvc BcastDVRUserService BluetoothUserService) do (
     net start %%S >nul 2>&1
 )
-echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Microsoft Store is now Operational.
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Microsoft Phone Link is now Operational.
 echo.
-echo %C_GRN%   [✔] SUCCESS: YOU CAN NOW DOWNLOAD AND INSTALL APPS FROM THE STORE.%C_RST%
+echo %C_GRN%   [✔] SUCCESS: YOU CAN NOW CONNECT AND SYNC YOUR PHONE.%C_RST%
 echo.
 pause
 goto MENU
@@ -321,7 +320,7 @@ goto MENU
 cls
 echo.
 echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
-echo %C_WHT%   ║ %C_RED%[*] INITIATING PERMANENT BROWSER UPDATER ELIMINATION PROTOCOL...       %C_WHT%║%C_RST%
+echo %C_WHT%   ║ %C_RED%[*] INITIATING BULLETPROOF BROWSER ELIMINATION PROTOCOL...             %C_WHT%║%C_RST%
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
 echo.
 
@@ -334,6 +333,7 @@ echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Disabling Chrome, Brave, E
 for %%B in (gupdate gupdatem braveupdate bravemupdate edgeupdate edgeupdatem MozillaMaintenance) do (
     net stop %%B /y >nul 2>&1
     sc config %%B start= disabled >nul 2>&1
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\%%B" /v Start /t REG_DWORD /d 4 /f >nul 2>&1
 )
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Browser Services Disabled.
 echo.
@@ -345,14 +345,26 @@ for %%T in ("\GoogleUpdateTaskMachineCore" "\GoogleUpdateTaskMachineUA" "\BraveU
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Tasks Successfully Deactivated.
 echo.
 
-echo %C_GRY%[%time:~0,8%]%C_RST% %C_YEL%[LOCK]%C_RST% Injecting Local Group Policies (GPO) to Block Internal Updates...
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_YEL%[LOCK]%C_RST% Injecting Core GPO ^& IFEO Debugger Locks (The Nuclear Fix)...
+:: 1. Standard Group Policy Locks
 reg add "HKLM\SOFTWARE\Policies\Google\Update" /v UpdateDefault /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\SOFTWARE\Policies\BraveSoftware\Update" /v UpdateDefault /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate" /v UpdateDefault /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\SOFTWARE\Policies\Mozilla\Firefox" /v DisableAppUpdate /t REG_DWORD /d 1 /f >nul 2>&1
-echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Security Policies Enforced.
+:: WOW6432Node GPO Locks
+reg add "HKLM\SOFTWARE\WOW6432Node\Policies\Google\Update" /v UpdateDefault /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\WOW6432Node\Policies\BraveSoftware\Update" /v UpdateDefault /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\EdgeUpdate" /v UpdateDefault /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\WOW6432Node\Policies\Mozilla\Firefox" /v DisableAppUpdate /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: 2. IFEO (Image File Execution Options) Debugger Traps - Makes updates mathematically impossible to run
+for %%X in (GoogleUpdate.exe MicrosoftEdgeUpdate.exe BraveUpdate.exe updater.exe maintenanceservice.exe) do (
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%X" /v Debugger /t REG_SZ /d "systray.exe" /f >nul 2>&1
+)
+
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Bulletproof IFEO ^& GPO Security Policies Enforced.
 echo.
-echo %C_GRN%   [✔] OPERATION COMPLETE: BROWSERS WILL NO LONGER UPDATE IN BACKGROUND.%C_RST%
+echo %C_GRN%   [✔] OPERATION COMPLETE: BROWSERS ARE NOW 100%% INCAPABLE OF UPDATING.%C_RST%
 echo.
 pause
 goto MENU
@@ -370,6 +382,7 @@ echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-Enabling Browser Updater Services...
 for %%B in (gupdate gupdatem braveupdate bravemupdate edgeupdate edgeupdatem MozillaMaintenance) do (
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\%%B" /v Start /t REG_DWORD /d 3 /f >nul 2>&1
     sc config %%B start= demand >nul 2>&1
 )
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Services Restored.
@@ -382,12 +395,23 @@ for %%T in ("\GoogleUpdateTaskMachineCore" "\GoogleUpdateTaskMachineUA" "\BraveU
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Tasks Restored.
 echo.
 
-echo %C_GRY%[%time:~0,8%]%C_RST% %C_YEL%[UNLOCK]%C_RST% Removing Update Blocks from Local Group Policies (GPO)...
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_YEL%[UNLOCK]%C_RST% Erasing GPO Locks and IFEO Debugger Traps...
+:: Erasing GPO
 reg delete "HKLM\SOFTWARE\Policies\Google\Update" /v UpdateDefault /f >nul 2>&1
 reg delete "HKLM\SOFTWARE\Policies\BraveSoftware\Update" /v UpdateDefault /f >nul 2>&1
 reg delete "HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate" /v UpdateDefault /f >nul 2>&1
 reg delete "HKLM\SOFTWARE\Policies\Mozilla\Firefox" /v DisableAppUpdate /f >nul 2>&1
-echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Security Policies Removed.
+reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\Google\Update" /v UpdateDefault /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\BraveSoftware\Update" /v UpdateDefault /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\EdgeUpdate" /v UpdateDefault /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\Mozilla\Firefox" /v DisableAppUpdate /f >nul 2>&1
+
+:: Erasing IFEO Traps
+for %%X in (GoogleUpdate.exe MicrosoftEdgeUpdate.exe BraveUpdate.exe updater.exe maintenanceservice.exe) do (
+    reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%X" /v Debugger /f >nul 2>&1
+)
+
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% All Security Policies Removed.
 echo.
 echo %C_GRN%   [✔] OPERATION COMPLETE: BROWSERS CAN NOW UPDATE NORMALLY.%C_RST%
 echo.
