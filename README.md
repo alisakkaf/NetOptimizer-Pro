@@ -7,13 +7,26 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 ![Safety](https://img.shields.io/badge/Safety-100%25_Reversible-orange?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-v2.8-red?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-v2.9-red?style=for-the-badge)
 
 <br>
 
 <a href="https://i.ibb.co/8gR169XK/1.png" target="_blank"><img src="https://i.ibb.co/8gR169XK/1.png" alt="NetOptimizer Pro Interface" border="0"></a>
 
 </div>
+
+---
+
+## 🆕 What's New in Version 2.9 (Recent Updates)
+
+* **🛡️ Secure System Restore Point Integration:** Running **Option 1 (Disable Services)** now automatically triggers the creation of a secure system restore point named `NetOptimizer Restore Point - By Ali Sakkaf` as a safety shield. If restore points are disabled or unsupported on your OS version, the script handles the exception silently and continues optimization smoothly.
+* **🌐 Deeper Telemetry & Network-Hungry Blocks:** Expanded blacklisted telemetry services and processes, including:
+  * *Services stopped and disabled:* Cellular Radio Management (`rmsvc`), Background Location Tracking (`lfsvc`), Sensor Reporting (`SensorService`, `SensorDataService`, `Sensors`), Data Sharing (`DsSvc`), Remote Registry, and Timezone Auto-Sync (`tzautoupdate`).
+  * *RAM-heavy processes killed:* Microsoft Copilot agents (`mscopilot.exe`, `copilot_setup.exe`), Microsoft Teams background network sync (`Teams.exe`), Cortana tracking, and modern SearchApp (`SearchApp.exe`).
+* **🔍 Bing Start Menu Search Network Block:** Prevents Windows Search from sending local query telemetries and web queries to Bing directly from the Start Menu.
+* **📊 100% Real Status Dashboard (Option 8):** Fully re-engineered! The dashboard now physically scans system paths to check if Google Chrome, Microsoft Edge, Brave, or Firefox is installed. Missing browsers are cleanly marked as `[UNINSTALLED]`.
+* **🎨 Pixel-Perfect Symmetrical UI (Pro Only):** Designed the Pro dashboard with premium ANSI borders, vibrant status tags, and mathematically balanced layout margins for an elegant look.
+* **🔘 Flexible Prompt Engine:** Refined all confirmation prompts (`YES/NO`) to accept `y`, `yes`, `Yes`, `YES`, or simply pressing `ENTER` to proceed, making operations extremely swift.
 
 ---
 
