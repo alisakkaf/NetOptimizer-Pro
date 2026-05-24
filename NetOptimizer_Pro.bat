@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 :: Full Support for UTF-8
 chcp 65001 >nul
-title NetOptimizer Pro v2.8 - By ALI SAKKAF
+title NetOptimizer Pro v2.9 - By ALI SAKKAF
 
 :: ==========================================
 :: ANSI COLOR ENGINE
@@ -37,9 +37,9 @@ if %errorlevel% NEQ 0 (
 :: ==========================================
 set "SVC_UPDATE_CORE=wuauserv bits dosvc UsoSvc"
 set "SVC_UPDATE_EXTRA=WaaSMedicSvc"
-set "SVC_TELEMETRY=DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks BcastDVRUserService BluetoothUserService"
+set "SVC_TELEMETRY=DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks BcastDVRUserService BluetoothUserService RemoteRegistry wisvc Fax SensorService SensorDataService Sensors embeddedmode DsSvc rmsvc tzautoupdate"
 set "SVC_BROWSERS=gupdate gupdatem braveupdate bravemupdate edgeupdate edgeupdatem MozillaMaintenance"
-set "PROC_TELEMETRY=msedgewebview2.exe OneDrive.exe Widgets.exe CompatTelRunner.exe DeviceCensus.exe software_reporter_tool.exe gamebarpresencewriter.exe PhoneExperienceHost.exe"
+set "PROC_TELEMETRY=msedgewebview2.exe OneDrive.exe Widgets.exe CompatTelRunner.exe DeviceCensus.exe software_reporter_tool.exe gamebarpresencewriter.exe PhoneExperienceHost.exe mscopilot.exe copilot_setup.exe Teams.exe cortana.exe SearchApp.exe"
 set "PROC_BROWSERS=GoogleUpdate.exe BraveUpdate.exe MicrosoftEdgeUpdate.exe maintenanceservice.exe opera_autoupdate.exe updater.exe BraveUpdateOnDemand.exe BraveCrashHandler.exe BraveCrashHandler64.exe BraveCrashHandlerArm64.exe BraveUpdateBroker.exe BraveUpdateComRegisterShell64.exe BraveUpdateComRegisterShellArm64.exe BraveUpdateCore.exe remoting_crashpad_handler.exe remoting_native_messaging_host.exe remote_assistance_host_uiaccess.exe remote_open_url.exe remote_assistance_host.exe remote_security_key.exe remoting_start_host.exe remote_webauthn.exe remoting_desktop.exe remoting_host.exe elevated_tracing_service.exe mscopilot.exe elevation_service.exe msedge_pwa_launcher.exe passkey_authenticator_plugin.exe notification_helper.exe notification_click_helper.exe msedge_proxy.exe identity_helper.exe pwahelper.exe ie_to_edge_stub.exe cookie_exporter.exe copilot_setup.exe"
 
 set "LOG_DIR=%~dp0NetOptimizer_Logs"
@@ -49,7 +49,7 @@ set "LOG_FILE=%LOG_DIR%\NetOptimizer_Log.txt"
 :: ==========================================
 :: AUTO-UPDATE ENGINE (PRO)
 :: ==========================================
-set "CURRENT_VERSION=2.8"
+set "CURRENT_VERSION=2.9"
 set "SCRIPT_NAME=NetOptimizer_Pro.bat"
 set "PASTEBIN_URL=https://pastebin.com/raw/uKR3Lvhg"
 set "PS_TLS=[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;"
@@ -185,9 +185,13 @@ echo.
 echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
 echo %C_WHT%   ║ %C_RED%[!] WARNING: This will disable all background services ^& telemetry.               %C_WHT%║%C_RST%
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
-echo.
-set /p confirm="   %C_YEL%>> Confirm? Type YES to proceed: %C_RST%"
-if /i not "!confirm!"=="YES" (
+set "confirm="
+set /p confirm="   %C_YEL%>> Confirm? [Press ENTER, Y, or YES to proceed, any other key to cancel]: %C_RST%"
+if not defined confirm set "confirm=YES"
+set "is_yes=0"
+if /i "!confirm!"=="YES" set "is_yes=1"
+if /i "!confirm!"=="Y" set "is_yes=1"
+if "!is_yes!"=="0" (
     echo %C_GRY%   [*] Cancelled. Returning to menu...%C_RST%
     timeout /t 2 >nul
     goto MENU
@@ -199,8 +203,13 @@ echo %C_WHT%   ║ %C_RED%[*] DEPLOYING MAXIMUM NETWORK PERFORMANCE PROTOCOL... 
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
 echo.
 
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Creating Secure System Restore Point...
+powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; Enable-ComputerRestore -Drive 'C:\'; Checkpoint-Computer -Description 'NetOptimizer Restore Point - By Ali Sakkaf' -RestorePointType 'MODIFY_SETTINGS'" >nul 2>&1
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Safe System Restore checkpoint completed.
+echo.
+
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_RED%[KILL]%C_RST% Terminating Resource-Heavy Background UI ^& Telemetry Processes...
-for %%P in (msedgewebview2.exe OneDrive.exe Widgets.exe CompatTelRunner.exe DeviceCensus.exe software_reporter_tool.exe gamebarpresencewriter.exe PhoneExperienceHost.exe) do (
+for %%P in (%PROC_TELEMETRY%) do (
     start "" /b taskkill /F /IM %%P /T >nul 2>&1
     echo [%date% %time:~0,8%] [KILL] Process: %%P -^> TERMINATED >> "%LOG_FILE%" 2>nul
 )
@@ -208,7 +217,7 @@ echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Telemetry ^& Background UI
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Stopping Windows Update Core Engine...
-for %%S in (wuauserv bits dosvc UsoSvc WaaSMedicSvc) do (
+for %%S in (%SVC_UPDATE_CORE% %SVC_UPDATE_EXTRA%) do (
     start "" /b sc stop %%S >nul 2>&1
     echo [%date% %time:~0,8%] [STOP] Service: %%S -^> STOPPED >> "%LOG_FILE%" 2>nul
 )
@@ -216,7 +225,7 @@ echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Update Engine Halted.
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Stopping Telemetry, Sync, Error Reporting ^& App Store Services...
-for %%S in (DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks BcastDVRUserService BluetoothUserService) do (
+for %%S in (%SVC_TELEMETRY%) do (
     start "" /b sc stop %%S >nul 2>&1
     echo [%date% %time:~0,8%] [STOP] Service: %%S -^> STOPPED >> "%LOG_FILE%" 2>nul
 )
@@ -224,12 +233,12 @@ echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Background Data Services H
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Permanently Disabling Services from Auto-Start...
-for %%S in (wuauserv bits dosvc UsoSvc DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks BcastDVRUserService BluetoothUserService) do (
+for %%S in (%SVC_UPDATE_CORE% %SVC_TELEMETRY%) do (
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\%%S" /v Start /t REG_DWORD /d 4 /f >nul 2>&1
     echo [%date% %time:~0,8%] [DISABLE] Service: %%S -^> DISABLED >> "%LOG_FILE%" 2>nul
 )
-reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v Start /t REG_DWORD /d 4 /f >nul 2>&1
-echo [%date% %time:~0,8%] [DISABLE] Service: WaaSMedicSvc -^> DISABLED >> "%LOG_FILE%" 2>nul
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\%SVC_UPDATE_EXTRA%" /v Start /t REG_DWORD /d 4 /f >nul 2>&1
+echo [%date% %time:~0,8%] [DISABLE] Service: %SVC_UPDATE_EXTRA% -^> DISABLED >> "%LOG_FILE%" 2>nul
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Services Locked (Start=Disabled).
 echo.
 
@@ -239,6 +248,12 @@ for %%T in ("Application Experience\ProgramDataUpdater" "Customer Experience Imp
     echo [%date% %time:~0,8%] [TASK] Task: %%~T -^> DISABLED >> "%LOG_FILE%" 2>nul
 )
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Scheduled Tasks Disabled.
+echo.
+
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Disabling Bing Search Background Network Queries...
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "BingSearchEnabled" /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaConsent" /t REG_DWORD /d 0 /f >nul 2>&1
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Bing Search Network Telemetry Stopped.
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Enforcing "Metered Connection" on Network Adapters...
@@ -285,6 +300,12 @@ for %%T in ("Application Experience\ProgramDataUpdater" "WindowsUpdate\Scheduled
     schtasks /Change /TN "Microsoft\Windows\%%~T" /Enable >nul 2>&1
 )
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Tasks Restored.
+echo.
+
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-enabling Bing Search Start Menu Queries...
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "BingSearchEnabled" /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaConsent" /f >nul 2>&1
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Bing Search Restored.
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Removing "Metered Connection" Restrictions...
@@ -393,9 +414,13 @@ echo.
 echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
 echo %C_WHT%   ║ %C_RED%[!] WARNING: This will permanently block ALL browser auto-updates!                 %C_WHT%║%C_RST%
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
-echo.
-set /p confirm2="   %C_YEL%>> Confirm? Type YES to proceed: %C_RST%"
-if /i not "!confirm2!"=="YES" (
+set "confirm2="
+set /p confirm2="   %C_YEL%>> Confirm? [Press ENTER, Y, or YES to proceed, any other key to cancel]: %C_RST%"
+if not defined confirm2 set "confirm2=YES"
+set "is_yes2=0"
+if /i "!confirm2!"=="YES" set "is_yes2=1"
+if /i "!confirm2!"=="Y" set "is_yes2=1"
+if "!is_yes2!"=="0" (
     echo %C_GRY%   [*] Cancelled. Returning to menu...%C_RST%
     timeout /t 2 >nul
     goto MENU
@@ -467,7 +492,15 @@ echo %C_WHT%   ╚════════════════════�
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-Enabling Browser Updater Services...
-for %%B in (%SVC_BROWSERS%) do (
+:: Set Automatic (2) for primary updaters
+for %%B in (gupdate braveupdate edgeupdate) do (
+    sc config %%B start= auto >nul 2>&1
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\%%B" /v Start /t REG_DWORD /d 2 /f >nul 2>&1
+    echo [%date% %time:~0,8%] [ENABLE] Browser Service: %%B -^> AUTO >> "%LOG_FILE%"
+)
+:: Set Manual (3) for secondary updaters
+for %%B in (gupdatem bravemupdate edgeupdatem MozillaMaintenance) do (
+    sc config %%B start= demand >nul 2>&1
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\%%B" /v Start /t REG_DWORD /d 3 /f >nul 2>&1
     echo [%date% %time:~0,8%] [ENABLE] Browser Service: %%B -^> DEMAND >> "%LOG_FILE%"
 )
@@ -482,14 +515,15 @@ echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Tasks Restored.
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_YEL%[UNLOCK]%C_RST% Erasing GPO Locks and IFEO Debugger Traps...
-:: Erasing GPO
-reg delete "HKLM\SOFTWARE\Policies\Google\Update" /v UpdateDefault /f >nul 2>&1
-reg delete "HKLM\SOFTWARE\Policies\BraveSoftware\Update" /v UpdateDefault /f >nul 2>&1
-reg delete "HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate" /v UpdateDefault /f >nul 2>&1
+:: Delete entire GPO Update keys for Google, Brave, and Edge to restore total defaults
+reg delete "HKLM\SOFTWARE\Policies\Google\Update" /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Policies\BraveSoftware\Update" /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate" /f >nul 2>&1
 reg delete "HKLM\SOFTWARE\Policies\Mozilla\Firefox" /v DisableAppUpdate /f >nul 2>&1
-reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\Google\Update" /v UpdateDefault /f >nul 2>&1
-reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\BraveSoftware\Update" /v UpdateDefault /f >nul 2>&1
-reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\EdgeUpdate" /v UpdateDefault /f >nul 2>&1
+
+reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\Google\Update" /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\BraveSoftware\Update" /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\EdgeUpdate" /f >nul 2>&1
 reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\Mozilla\Firefox" /v DisableAppUpdate /f >nul 2>&1
 
 :: Erasing IFEO Traps
@@ -511,70 +545,181 @@ goto MENU
 cls
 echo.
 echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
-sc qc wuauserv 2>nul | findstr /i "DISABLED" >nul 2>&1
-if not errorlevel 1 (set "ST_WU=%C_RED%DISABLED%C_RST%") else (set "ST_WU=%C_GRN%ENABLED %C_RST%")
-sc qc BITS 2>nul | findstr /i "DISABLED" >nul 2>&1
-if not errorlevel 1 (set "ST_BITS=%C_RED%DISABLED%C_RST%") else (set "ST_BITS=%C_GRN%ENABLED %C_RST%")
-sc qc DiagTrack 2>nul | findstr /i "DISABLED" >nul 2>&1
-if not errorlevel 1 (set "ST_TEL=%C_RED%DISABLED%C_RST%") else (set "ST_TEL=%C_GRN%ENABLED %C_RST%")
-sc qc SysMain 2>nul | findstr /i "DISABLED" >nul 2>&1
-if not errorlevel 1 (set "ST_SYS=%C_RED%DISABLED%C_RST%") else (set "ST_SYS=%C_GRN%ENABLED %C_RST%")
-sc qc gupdate 2>nul | findstr /i "DISABLED" >nul 2>&1
-if not errorlevel 1 (set "ST_CHR=%C_RED%DISABLED%C_RST%") else (set "ST_CHR=%C_GRN%ENABLED %C_RST%")
-schtasks /query /tn "\GoogleUpdateTaskMachineCore" /fo LIST >nul 2>&1
-if errorlevel 1 set "ST_CHR=DISABLED"
-sc qc edgeupdate 2>nul | findstr /i "DISABLED" >nul 2>&1
-if not errorlevel 1 (set "ST_EDG=%C_RED%DISABLED%C_RST%") else (set "ST_EDG=%C_GRN%ENABLED %C_RST%")
-reg query "HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate" /v UpdateDefault >nul 2>&1
-if not errorlevel 1 set "ST_EDG=%C_RED%DISABLED%C_RST%"
-sc qc braveupdate 2>nul | findstr /i "DISABLED" >nul 2>&1
-if not errorlevel 1 (set "ST_BRV=%C_RED%DISABLED%C_RST%") else (set "ST_BRV=%C_GRN%ENABLED %C_RST%")
-schtasks /query /tn "\BraveUpdateTaskMachineCore" /fo LIST >nul 2>&1
-if errorlevel 1 set "ST_BRV=DISABLED"
-sc qc MozillaMaintenance 2>nul | findstr /i "DISABLED" >nul 2>&1
-if not errorlevel 1 (set "ST_FF=%C_RED%DISABLED%C_RST%") else (set "ST_FF=%C_GRN%ENABLED %C_RST%")
-set "ST_MET=DEFAULT "
-for /f "tokens=3" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\DefaultMediaCost" /v WiFi 2^>nul ^| find /i "WiFi"') do (
-    if "%%a"=="0x2" set "ST_MET=ENFORCED"
+echo %C_WHT%   ║ %C_YEL%SYSTEM STATUS DASHBOARD                                              %C_WHT%║%C_RST%
+echo %C_WHT%   ╠════════════════════════════════════════════════════════════════════════╣%C_RST%
+
+:: Check Windows Update Engine
+sc query wuauserv >nul 2>&1
+if %errorlevel% NEQ 0 (set "ST_WU=%C_RED%[ NOT FOUND ]%C_RST%") else (
+    sc qc wuauserv 2>nul | findstr /i "DISABLED" >nul 2>&1
+    if not errorlevel 1 (set "ST_WU=%C_RED%[  BLOCKED  ]%C_RST%") else (set "ST_WU=%C_GRN%[  ACTIVE   ]%C_RST%")
 )
-set "ST_HOSTS=CLEAN   "
+
+:: Check Background Transfer (BITS)
+sc query BITS >nul 2>&1
+if %errorlevel% NEQ 0 (set "ST_BITS=%C_RED%[ NOT FOUND ]%C_RST%") else (
+    sc qc BITS 2>nul | findstr /i "DISABLED" >nul 2>&1
+    if not errorlevel 1 (set "ST_BITS=%C_RED%[  BLOCKED  ]%C_RST%") else (set "ST_BITS=%C_GRN%[  ACTIVE   ]%C_RST%")
+)
+
+:: Check Windows Telemetry
+sc query DiagTrack >nul 2>&1
+if %errorlevel% NEQ 0 (set "ST_TEL=%C_RED%[ NOT FOUND ]%C_RST%") else (
+    sc qc DiagTrack 2>nul | findstr /i "DISABLED" >nul 2>&1
+    if not errorlevel 1 (set "ST_TEL=%C_RED%[  BLOCKED  ]%C_RST%") else (set "ST_TEL=%C_GRN%[  ACTIVE   ]%C_RST%")
+)
+
+:: Check SysMain (Superfetch)
+sc query SysMain >nul 2>&1
+if %errorlevel% NEQ 0 (set "ST_SYS=%C_RED%[ NOT FOUND ]%C_RST%") else (
+    sc qc SysMain 2>nul | findstr /i "DISABLED" >nul 2>&1
+    if not errorlevel 1 (set "ST_SYS=%C_RED%[  BLOCKED  ]%C_RST%") else (set "ST_SYS=%C_GRN%[  ACTIVE   ]%C_RST%")
+)
+
+:: Check Chrome Update
+set "IS_CHR=0"
+if exist "!ProgramFiles!\Google\Chrome\Application\chrome.exe" set "IS_CHR=1"
+if exist "!ProgramFiles(x86)!\Google\Chrome\Application\chrome.exe" set "IS_CHR=1"
+if exist "!LocalAppData!\Google\Chrome\Application\chrome.exe" set "IS_CHR=1"
+
+set "ST_CHR="
+if "!IS_CHR!"=="0" (
+    set "ST_CHR=%C_GRY%[UNINSTALLED]%C_RST%"
+) else (
+    set "CHK_CHR=0"
+    reg query "HKLM\SOFTWARE\Policies\Google\Update" /v UpdateDefault 2>nul | findstr "0x0" >nul 2>&1
+    if not errorlevel 1 set "CHK_CHR=1"
+    reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\GoogleUpdate.exe" /v Debugger 2>nul >nul 2>&1
+    if not errorlevel 1 set "CHK_CHR=1"
+    sc query gupdate >nul 2>&1
+    if !errorlevel! EQU 0 (
+        sc qc gupdate 2>nul | findstr /i "DISABLED" >nul 2>&1
+        if not errorlevel 1 set "CHK_CHR=1"
+    )
+    if "!CHK_CHR!"=="1" (set "ST_CHR=%C_RED%[  BLOCKED  ]%C_RST%") else (set "ST_CHR=%C_GRN%[  ACTIVE   ]%C_RST%")
+)
+
+:: Check Edge Update
+set "IS_EDG=0"
+if exist "!ProgramFiles!\Microsoft\Edge\Application\msedge.exe" set "IS_EDG=1"
+if exist "!ProgramFiles(x86)!\Microsoft\Edge\Application\msedge.exe" set "IS_EDG=1"
+
+set "ST_EDG="
+if "!IS_EDG!"=="0" (
+    set "ST_EDG=%C_GRY%[UNINSTALLED]%C_RST%"
+) else (
+    set "CHK_EDG=0"
+    reg query "HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate" /v UpdateDefault 2>nul | findstr "0x0" >nul 2>&1
+    if not errorlevel 1 set "CHK_EDG=1"
+    reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\MicrosoftEdgeUpdate.exe" /v Debugger 2>nul >nul 2>&1
+    if not errorlevel 1 set "CHK_EDG=1"
+    sc query edgeupdate >nul 2>&1
+    if !errorlevel! EQU 0 (
+        sc qc edgeupdate 2>nul | findstr /i "DISABLED" >nul 2>&1
+        if not errorlevel 1 set "CHK_EDG=1"
+    )
+    if "!CHK_EDG!"=="1" (set "ST_EDG=%C_RED%[  BLOCKED  ]%C_RST%") else (set "ST_EDG=%C_GRN%[  ACTIVE   ]%C_RST%")
+)
+
+:: Check Brave Update
+set "IS_BRV=0"
+if exist "!ProgramFiles!\BraveSoftware\Brave-Browser\Application\brave.exe" set "IS_BRV=1"
+if exist "!ProgramFiles(x86)!\BraveSoftware\Brave-Browser\Application\brave.exe" set "IS_BRV=1"
+if exist "!LocalAppData!\BraveSoftware\Brave-Browser\Application\brave.exe" set "IS_BRV=1"
+
+set "ST_BRV="
+if "!IS_BRV!"=="0" (
+    set "ST_BRV=%C_GRY%[UNINSTALLED]%C_RST%"
+) else (
+    set "CHK_BRV=0"
+    reg query "HKLM\SOFTWARE\Policies\BraveSoftware\Update" /v UpdateDefault 2>nul | findstr "0x0" >nul 2>&1
+    if not errorlevel 1 set "CHK_BRV=1"
+    reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\BraveUpdate.exe" /v Debugger 2>nul >nul 2>&1
+    if not errorlevel 1 set "CHK_BRV=1"
+    sc query braveupdate >nul 2>&1
+    if !errorlevel! EQU 0 (
+        sc qc braveupdate 2>nul | findstr /i "DISABLED" >nul 2>&1
+        if not errorlevel 1 set "CHK_BRV=1"
+    )
+    if "!CHK_BRV!"=="1" (set "ST_BRV=%C_RED%[  BLOCKED  ]%C_RST%") else (set "ST_BRV=%C_GRN%[  ACTIVE   ]%C_RST%")
+)
+
+:: Check Firefox Update
+set "IS_FF=0"
+if exist "!ProgramFiles!\Mozilla Firefox\firefox.exe" set "IS_FF=1"
+if exist "!ProgramFiles(x86)!\Mozilla Firefox\firefox.exe" set "IS_FF=1"
+
+set "ST_FF="
+if "!IS_FF!"=="0" (
+    set "ST_FF=%C_GRY%[UNINSTALLED]%C_RST%"
+) else (
+    set "CHK_FF=0"
+    reg query "HKLM\SOFTWARE\Policies\Mozilla\Firefox" /v DisableAppUpdate 2>nul | findstr "0x1" >nul 2>&1
+    if not errorlevel 1 set "CHK_FF=1"
+    reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\maintenanceservice.exe" /v Debugger 2>nul >nul 2>&1
+    if not errorlevel 1 set "CHK_FF=1"
+    reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\updater.exe" /v Debugger 2>nul >nul 2>&1
+    if not errorlevel 1 set "CHK_FF=1"
+    sc query MozillaMaintenance >nul 2>&1
+    if !errorlevel! EQU 0 (
+        sc qc MozillaMaintenance 2>nul | findstr /i "DISABLED" >nul 2>&1
+        if not errorlevel 1 set "CHK_FF=1"
+    )
+    if "!CHK_FF!"=="1" (set "ST_FF=%C_RED%[  BLOCKED  ]%C_RST%") else (set "ST_FF=%C_GRN%[  ACTIVE   ]%C_RST%")
+)
+
+:: Check Metered WiFi Connection
+set "ST_MET=%C_GRY%[  NORMAL   ]%C_RST%"
+set "T_MET="
+for /f "tokens=3" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\DefaultMediaCost" /v WiFi 2^>nul ^| find /i "WiFi"') do set "T_MET=%%a"
+if "!T_MET!"=="0x2" set "ST_MET=%C_YEL%[ ENFORCED  ]%C_RST%"
+
+:: Check Hosts File
+set "ST_HOSTS=%C_GRN%[   CLEAN   ]%C_RST%"
 findstr /i "microsoft.com" "%SystemRoot%\System32\drivers\etc\hosts" >nul 2>&1
-if not errorlevel 1 set "ST_HOSTS=MODIFIED"
-set "CURRENT_DNS=Default DHCP    "
+if not errorlevel 1 set "ST_HOSTS=%C_YEL%[ MODIFIED  ]%C_RST%"
+
+:: Check Active DNS Server
+set "CURRENT_DNS=Default DHCP "
+set "NET_INT="
 for /f "tokens=1,2,3*" %%A in ('netsh interface show interface ^| find "Connected" 2^>nul') do set "NET_INT=%%D"
 if not "!NET_INT!"=="" (
     for /f "tokens=*" %%A in ('netsh interface ipv4 show dns name^="!NET_INT!" 2^>nul ^| findstr /R "[0-9][0-9]*\.[0-9]"') do (
-        echo %%A | find "1.1.1.1" >nul 2>&1 && set "CURRENT_DNS=Cloudflare      "
-        echo %%A | find "8.8.8.8" >nul 2>&1 && set "CURRENT_DNS=Google DNS      "
-        echo %%A | find "9.9.9.9" >nul 2>&1 && set "CURRENT_DNS=Quad9           "
-        echo %%A | find "94.140.14.14" >nul 2>&1 && set "CURRENT_DNS=AdGuard         "
-        echo %%A | find "76.76.2.0" >nul 2>&1 && set "CURRENT_DNS=ControlD        "
-        echo %%A | find "91.239.100.100" >nul 2>&1 && set "CURRENT_DNS=UncensoredDNS   "
-        echo %%A | find "178.22.122.100" >nul 2>&1 && set "CURRENT_DNS=Shecan          "
-        echo %%A | find "10.202.10.202" >nul 2>&1 && set "CURRENT_DNS=403 DNS         "
-        echo %%A | find "78.157.42.100" >nul 2>&1 && set "CURRENT_DNS=Electro DNS     "
+        echo %%A | find "1.1.1.1" >nul 2>&1 && set "CURRENT_DNS=Cloudflare   "
+        echo %%A | find "8.8.8.8" >nul 2>&1 && set "CURRENT_DNS=Google DNS   "
+        echo %%A | find "9.9.9.9" >nul 2>&1 && set "CURRENT_DNS=Quad9        "
+        echo %%A | find "94.140.14.14" >nul 2>&1 && set "CURRENT_DNS=AdGuard      "
+        echo %%A | find "76.76.2.0" >nul 2>&1 && set "CURRENT_DNS=ControlD     "
+        echo %%A | find "91.239.100.100" >nul 2>&1 && set "CURRENT_DNS=UncensoredDNS"
+        echo %%A | find "178.22.122.100" >nul 2>&1 && set "CURRENT_DNS=Shecan       "
+        echo %%A | find "10.202.10.202" >nul 2>&1 && set "CURRENT_DNS=403 DNS      "
+        echo %%A | find "78.157.42.100" >nul 2>&1 && set "CURRENT_DNS=Electro DNS  "
     )
 )
-set "ST_DOH=NOT SET "
+set "ST_DNS=%C_CYA%[!CURRENT_DNS!]%C_RST%"
+
+:: Check Browser DNS Policy
+set "ST_DOH=%C_GRY%[  NOT SET  ]%C_RST%"
 reg query "HKLM\SOFTWARE\Policies\Google\Chrome" /v DnsOverHttpsMode >nul 2>&1
-if not errorlevel 1 set "ST_DOH=MANAGED "
-echo %C_WHT%   ║ %C_CYA%[ SYSTEM ^& TELEMETRY ]                                                 %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Windows Update Engine        : !ST_WU!                                %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Background Transfer BITS     : !ST_BITS!                                %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Windows Telemetry            : !ST_TEL!                                %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% SysMain (Superfetch)         : !ST_SYS!                                %C_WHT%║%C_RST%
+if not errorlevel 1 set "ST_DOH=%C_GRN%[  SECURE   ]%C_RST%"
+
+echo %C_WHT%   ║ %C_CYA%[ 🖥️  SYSTEM ^& TELEMETRY SERVICES ]                              %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Windows Update Engine        : !ST_WU!                          %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Background Transfer (BITS)   : !ST_BITS!                          %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Windows Telemetry Service    : !ST_TEL!                          %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% SysMain (Superfetch) Service : !ST_SYS!                          %C_WHT%║%C_RST%
 echo %C_WHT%   ╠════════════════════════════════════════════════════════════════════════╣%C_RST%
-echo %C_WHT%   ║ %C_CYA%[ BROWSERS AUTO-UPDATE ]                                               %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Google Chrome                : !ST_CHR!                                %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Microsoft Edge               : !ST_EDG!                                %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Brave Browser                : !ST_BRV!                                %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Mozilla Firefox              : !ST_FF!                                %C_WHT%║%C_RST%
+echo %C_WHT%   ║ %C_CYA%[ 🌐 BROWSER AUTO-UPDATE POLICIES ]                               %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Google Chrome Update Service : !ST_CHR!                          %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Microsoft Edge Update Service: !ST_EDG!                          %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Brave Browser Update Service : !ST_BRV!                          %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Mozilla Firefox Maintenance  : !ST_FF!                          %C_WHT%║%C_RST%
 echo %C_WHT%   ╠════════════════════════════════════════════════════════════════════════╣%C_RST%
-echo %C_WHT%   ║ %C_CYA%[ NETWORK ^& DNS ]                                                      %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Metered WiFi Connection      : !ST_MET!                                %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Hosts File                   : !ST_HOSTS!                                %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Active DNS Server            : !CURRENT_DNS!                        %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_RST% Browser DNS Policy           : !ST_DOH!                                %C_WHT%║%C_RST%
+echo %C_WHT%   ║ %C_CYA%[ 📶 NETWORK COST ^& SECURITY CONFIGS ]                            %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Metered Network Adapter Cost : !ST_MET!                          %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Hosts File Integrity         : !ST_HOSTS!                          %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Active DNS Resolver          : !ST_DNS!                          %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_RST% Browser DNS Security (DoH)   : !ST_DOH!                          %C_WHT%║%C_RST%
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
 echo.
 pause
