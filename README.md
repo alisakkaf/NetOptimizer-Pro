@@ -7,7 +7,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 ![Safety](https://img.shields.io/badge/Safety-100%25_Reversible-orange?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-v2.9-red?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-v3.0-red?style=for-the-badge)
 
 <br>
 
@@ -17,16 +17,14 @@
 
 ---
 
-## 🆕 What's New in Version 2.9 (Recent Updates)
+## 🆕 What's New in Version 3.0 (Recent Updates)
 
-* **🛡️ Secure System Restore Point Integration:** Running **Option 1 (Disable Services)** now automatically triggers the creation of a secure system restore point named `NetOptimizer Restore Point - By Ali Sakkaf` as a safety shield. If restore points are disabled or unsupported on your OS version, the script handles the exception silently and continues optimization smoothly.
-* **🌐 Deeper Telemetry & Network-Hungry Blocks:** Expanded blacklisted telemetry services and processes, including:
-  * *Services stopped and disabled:* Cellular Radio Management (`rmsvc`), Background Location Tracking (`lfsvc`), Sensor Reporting (`SensorService`, `SensorDataService`, `Sensors`), Data Sharing (`DsSvc`), Remote Registry, and Timezone Auto-Sync (`tzautoupdate`).
-  * *RAM-heavy processes killed:* Microsoft Copilot agents (`mscopilot.exe`, `copilot_setup.exe`), Microsoft Teams background network sync (`Teams.exe`), Cortana tracking, and modern SearchApp (`SearchApp.exe`).
-* **🔍 Bing Start Menu Search Network Block:** Prevents Windows Search from sending local query telemetries and web queries to Bing directly from the Start Menu.
-* **📊 100% Real Status Dashboard (Option 8):** Fully re-engineered! The dashboard now physically scans system paths to check if Google Chrome, Microsoft Edge, Brave, or Firefox is installed. Missing browsers are cleanly marked as `[UNINSTALLED]`.
-* **🎨 Pixel-Perfect Symmetrical UI (Pro Only):** Designed the Pro dashboard with premium ANSI borders, vibrant status tags, and mathematically balanced layout margins for an elegant look.
-* **🔘 Flexible Prompt Engine:** Refined all confirmation prompts (`YES/NO`) to accept `y`, `yes`, `Yes`, `YES`, or simply pressing `ENTER` to proceed, making operations extremely swift.
+* **🛡️ Path Hardening & Exclamation Mark Safety:** Disables global Delayed Expansion (`setlocal EnableDelayedExpansion`) in both Pro and Lite scripts. Scripts are now 100% stable when executed from paths with spaces, exclamation marks (`!`), or other special characters.
+* **🔑 Bulletproof Privilege Elevation:** Modernized UAC admin checks to use PowerShell environment variables, preventing Windows Defender/antivirus heuristic flags on temporary scripts. Includes an async VBScript fallback and a pause on refusal.
+* **🌐 Multi-Interface DNS Configuration:** Applies or restores DNS settings to all active/connected interfaces concurrently rather than only modifying the last detected interface.
+* **🧹 Replacement of Deprecated WMIC:** Memory diagnostics in Option 13 (RAM Optimizer) now query modern PowerShell CIM instances (`Get-CimInstance Win32_OperatingSystem`), ensuring compatibility on Windows 11 24H2+.
+* **☁️ Hardened Auto-Updater:** The update check executes directly in powershell memory to avoid disk write dependencies, and checks size (minimum 10KB check) and inspects contents for the `"NetOptimizer"` keyword.
+
 
 ---
 
