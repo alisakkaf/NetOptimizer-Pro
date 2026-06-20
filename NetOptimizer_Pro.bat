@@ -148,7 +148,7 @@ echo %C_RED%  ★                                                               
 echo %C_RED%  ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★%C_RST%
 echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
 echo %C_WHT%   ║%C_YEL%              ⚡ ULTIMATE NETWORK ^& UPDATE SERVICES KILLER ⚡           %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_GRN%                    Developed By: A L I  S A K K A F  v2.9              %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_GRN%                    Developed By: A L I  S A K K A F  v3.0              %C_WHT%║%C_RST%
 echo %C_WHT%   ║%C_WHT%                    GitHub User: github.com/alisakkaf                   %C_WHT%║%C_RST%
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
 echo.
