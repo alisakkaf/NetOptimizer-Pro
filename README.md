@@ -7,7 +7,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 ![Safety](https://img.shields.io/badge/Safety-100%25_Reversible-orange?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-v3.0-red?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-v3.1-red?style=for-the-badge)
 
 <br>
 
@@ -17,13 +17,11 @@
 
 ---
 
-## 🆕 What's New in Version 3.0 (Recent Updates)
+## 🆕 What's New in Version 3.1 (Recent Updates)
 
-* **🛡️ Path Hardening & Exclamation Mark Safety:** Disables global Delayed Expansion (`setlocal EnableDelayedExpansion`) in both Pro and Lite scripts. Scripts are now 100% stable when executed from paths with spaces, exclamation marks (`!`), or other special characters.
-* **🔑 Bulletproof Privilege Elevation:** Modernized UAC admin checks to use PowerShell environment variables, preventing Windows Defender/antivirus heuristic flags on temporary scripts. Includes an async VBScript fallback and a pause on refusal.
-* **🌐 Multi-Interface DNS Configuration:** Applies or restores DNS settings to all active/connected interfaces concurrently rather than only modifying the last detected interface.
-* **🧹 Replacement of Deprecated WMIC:** Memory diagnostics in Option 13 (RAM Optimizer) now query modern PowerShell CIM instances (`Get-CimInstance Win32_OperatingSystem`), ensuring compatibility on Windows 11 24H2+.
-* **☁️ Hardened Auto-Updater:** The update check executes directly in powershell memory to avoid disk write dependencies, and checks size (minimum 10KB check) and inspects contents for the `"NetOptimizer"` keyword.
+* **🌐 Targeted Browser Update Controls:** Introducing a common sub-menu when choosing Option [5] Temporary Pause, [6] Permanent Block, or [7] Restore Defaults. You can now target Chrome, Edge, Brave, or Firefox individually, or choose "ALL Browsers" to process them collectively.
+* **🔒 Dynamic Resource Lockdown:** Registry policies, services, GPO rules, scheduled tasks, and IFEO debugger blocks are applied specifically per-browser to guarantee zero impact on non-selected browsers.
+* **🛡️ Full Edition Synchronization:** Feature parity between the Pro (ANSI color + Emojis) and Lite (plain ASCII text) editions, with no global Delayed Expansion and complete compatibility with Windows 7/8/10/11.
 
 
 ---
@@ -81,11 +79,12 @@ When you trigger the Disable protocol **[Option 1]**, the script dives deep into
 * **Microsoft Phone Link [Option 4]:** Exclusively reactivates the essential services for Microsoft Phone Link (`PhoneSvc`, `NcbService`, `WpnService`, `BcastDVRUserService`, `BluetoothUserService`) and restores the required background app registry entries, allowing seamless phone message and photo sync without unlocking the rest of the system bloatware.
 
 ### 3. ❌ The Ultimate Browser Auto-Update Controller
-Browsers (Chrome, Edge, Brave, Firefox) often ignore standard service disabling by utilizing hidden crash handlers and remoting tools. NetOptimizer uses a Dual-System approach:
+Browsers (Chrome, Edge, Brave, Firefox) often ignore standard service disabling by utilizing hidden crash handlers and remoting tools. NetOptimizer features a granular, targeted browser control system:
 
-* **⏸️ Temporary Pause [Option 5]:** Instantly frees up RAM by terminating 30+ hidden browser processes and stops updater services for the *current session only*. Everything returns to normal automatically upon a PC reboot. Perfect for immediate bandwidth relief.
-* **❌ Permanent Block [Option 6]:** Hard-kills active processes, permanently disables update services, destroys Scheduled Tasks, and injects stringent Local Group Policy (GPO) rules **and IFEO (Image File Execution Options) Debugger Traps** to block browsers from even attempting to check for updates — making updates mathematically impossible to run.
-* **✅ Restore Defaults [Option 7]:** Removes all GPO locks, IFEO traps, and restores browser updater services and scheduled tasks to normal.
+* **Targeted Selection Sub-Menu:** Launching Option [5], [6], or [7] prompts a common menu to choose Google Chrome, Microsoft Edge, Brave Browser, Mozilla Firefox, or **ALL** browsers.
+* **⏸️ Temporary Pause [Option 5]:** Instantly terminates active browser processes and stops updater services for the selected browser (or all) for the *current session only*. Everything returns to normal automatically upon a PC reboot.
+* **❌ Permanent Block [Option 6]:** Hard-kills active updater processes, permanently disables updater services, deactivates scheduled tasks, and injects GPO policy locks and Image File Execution Options (IFEO) debugger traps for the targeted browser (or all).
+* **✅ Restore Defaults [Option 7]:** Restores auto-update services, scheduled tasks, GPO registry policies, and IFEO debugger settings back to normal for the targeted browser (or all).
 
 ### 4. 🤖 Self-Healing Auto-Updater Engine
 NetOptimizer features a highly advanced, bulletproof Auto-Updater built directly into the Batch script. On launch, it safely pings a secure server to check for the latest versions. If an update is found, it uses native `curl` or `PowerShell` engines to download, replace, and restart itself within seconds—ensuring you always have the latest telemetry blocks without lifting a finger.
