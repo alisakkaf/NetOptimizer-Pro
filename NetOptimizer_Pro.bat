@@ -2,7 +2,7 @@
 setlocal
 :: Full Support for UTF-8
 chcp 65001 >nul
-title NetOptimizer Pro v3.0 - By ALI SAKKAF
+title NetOptimizer Pro v3.1 - By ALI SAKKAF
 
 :: ==========================================
 :: ANSI COLOR ENGINE
@@ -61,7 +61,7 @@ set "LOG_FILE=%LOG_DIR%\NetOptimizer_Log.txt"
 :: ==========================================
 :: AUTO-UPDATE ENGINE (PRO)
 :: ==========================================
-set "CURRENT_VERSION=3.0"
+set "CURRENT_VERSION=3.1"
 set "SCRIPT_NAME=NetOptimizer_Pro.bat"
 set "PASTEBIN_URL=https://pastebin.com/raw/uKR3Lvhg"
 set "PS_TLS=[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;"
@@ -148,7 +148,7 @@ echo %C_RED%  ★                                                               
 echo %C_RED%  ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★%C_RST%
 echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
 echo %C_WHT%   ║%C_YEL%              ⚡ ULTIMATE NETWORK ^& UPDATE SERVICES KILLER ⚡           %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_GRN%                    Developed By: A L I  S A K K A F  v3.0              %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_GRN%                    Developed By: A L I  S A K K A F  v3.1              %C_WHT%║%C_RST%
 echo %C_WHT%   ║%C_WHT%                    GitHub User: github.com/alisakkaf                   %C_WHT%║%C_RST%
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
 echo.
@@ -188,9 +188,9 @@ if "%choice%"=="1"  goto DISABLE
 if "%choice%"=="2"  goto ENABLE
 if "%choice%"=="3"  goto ENABLE_WU_STORE
 if "%choice%"=="4"  goto ENABLE_PHONE_LINK
-if "%choice%"=="5"  goto DISABLE_BROWSERS_TEMP
-if "%choice%"=="6"  goto DISABLE_BROWSERS_PERM
-if "%choice%"=="7"  goto ENABLE_BROWSERS
+if "%choice%"=="5"  set "BR_ACT=PAUSE" & goto BROWSER_SELECT
+if "%choice%"=="6"  set "BR_ACT=BLOCK" & goto BROWSER_SELECT
+if "%choice%"=="7"  set "BR_ACT=RESTORE" & goto BROWSER_SELECT
 if "%choice%"=="8"  goto STATUS_DASHBOARD
 if "%choice%"=="9"  goto DNS_OPTIMIZATION
 if "%choice%"=="10" goto OPEN_LOGS
@@ -404,6 +404,233 @@ for %%S in (NcbService WpnService PhoneSvc BcastDVRUserService BluetoothUserServ
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Microsoft Phone Link is now Operational.
 echo.
 echo %C_GRN%   [✔] SUCCESS: YOU CAN NOW CONNECT AND SYNC YOUR PHONE.%C_RST%
+echo.
+pause
+goto MENU
+
+:: ==========================================
+:: BROWSER AUTO-UPDATE CONTROL SUB-MENU
+:: ==========================================
+:BROWSER_SELECT
+cls
+echo.
+echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
+echo %C_WHT%   ║ %C_CYA%⚡ SELECT BROWSER TO TARGET                                              %C_WHT%║%C_RST%
+echo %C_WHT%   ╠════════════════════════════════════════════════════════════════════════╣%C_RST%
+echo   %C_CYA%[1]%C_RST% Google Chrome
+echo   %C_CYA%[2]%C_RST% Microsoft Edge
+echo   %C_CYA%[3]%C_RST% Brave Browser
+echo   %C_CYA%[4]%C_RST% Mozilla Firefox
+echo   %C_CYA%[5]%C_RST% %C_YEL%ALL Browsers%C_RST%
+echo   %C_GRY%[0] Back to Menu%C_RST%
+echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
+echo.
+set /p br_choice="   %C_YEL%>> Select [1-5 / 0]: %C_RST%"
+
+if "%br_choice%"=="0" goto MENU
+if "%br_choice%"=="1" goto SET_CHROME
+if "%br_choice%"=="2" goto SET_EDGE
+if "%br_choice%"=="3" goto SET_BRAVE
+if "%br_choice%"=="4" goto SET_FIREFOX
+if "%br_choice%"=="5" goto SET_ALL
+goto BROWSER_SELECT
+
+:SET_CHROME
+set "BR_NAME=Google Chrome"
+set "BR_SVC=gupdate gupdatem"
+set "BR_SVC_PRIMARY=gupdate"
+set "BR_SVC_SECONDARY=gupdatem"
+set "BR_PROC=GoogleUpdate.exe software_reporter_tool.exe"
+set "BR_TASKS=\GoogleUpdateTaskMachineCore \GoogleUpdateTaskMachineUA"
+set "BR_GPO_KEY=Google\Update"
+set "BR_GPO_VAL=UpdateDefault"
+set "BR_GPO_TYPE=REG_DWORD"
+set "BR_GPO_DATA=0"
+set "BR_IFEO=GoogleUpdate.exe"
+goto EXECUTE_ACTION
+
+:SET_EDGE
+set "BR_NAME=Microsoft Edge"
+set "BR_SVC=edgeupdate edgeupdatem"
+set "BR_SVC_PRIMARY=edgeupdate"
+set "BR_SVC_SECONDARY=edgeupdatem"
+set "BR_PROC=MicrosoftEdgeUpdate.exe"
+set "BR_TASKS=\MicrosoftEdgeUpdateTaskMachineCore \MicrosoftEdgeUpdateTaskMachineUA"
+set "BR_GPO_KEY=Microsoft\EdgeUpdate"
+set "BR_GPO_VAL=UpdateDefault"
+set "BR_GPO_TYPE=REG_DWORD"
+set "BR_GPO_DATA=0"
+set "BR_IFEO=MicrosoftEdgeUpdate.exe"
+goto EXECUTE_ACTION
+
+:SET_BRAVE
+set "BR_NAME=Brave Browser"
+set "BR_SVC=braveupdate bravemupdate"
+set "BR_SVC_PRIMARY=braveupdate"
+set "BR_SVC_SECONDARY=bravemupdate"
+set "BR_PROC=BraveUpdate.exe BraveUpdateOnDemand.exe BraveCrashHandler.exe BraveCrashHandler64.exe BraveCrashHandlerArm64.exe BraveUpdateBroker.exe BraveUpdateComRegisterShell64.exe BraveUpdateComRegisterShellArm64.exe BraveUpdateCore.exe"
+set "BR_TASKS=\BraveUpdateTaskMachineCore \BraveUpdateTaskMachineUA"
+set "BR_GPO_KEY=BraveSoftware\Update"
+set "BR_GPO_VAL=UpdateDefault"
+set "BR_GPO_TYPE=REG_DWORD"
+set "BR_GPO_DATA=0"
+set "BR_IFEO=BraveUpdate.exe"
+goto EXECUTE_ACTION
+
+:SET_FIREFOX
+set "BR_NAME=Mozilla Firefox"
+set "BR_SVC=MozillaMaintenance"
+set "BR_SVC_PRIMARY="
+set "BR_SVC_SECONDARY=MozillaMaintenance"
+set "BR_PROC=maintenanceservice.exe updater.exe"
+set "BR_TASKS="
+set "BR_GPO_KEY=Mozilla\Firefox"
+set "BR_GPO_VAL=DisableAppUpdate"
+set "BR_GPO_TYPE=REG_DWORD"
+set "BR_GPO_DATA=1"
+set "BR_IFEO=maintenanceservice.exe updater.exe"
+goto EXECUTE_ACTION
+
+:SET_ALL
+if "%BR_ACT%"=="PAUSE" goto DISABLE_BROWSERS_TEMP
+if "%BR_ACT%"=="BLOCK" goto DISABLE_BROWSERS_PERM
+if "%BR_ACT%"=="RESTORE" goto ENABLE_BROWSERS
+goto MENU
+
+:EXECUTE_ACTION
+if "%BR_ACT%"=="PAUSE" goto BROWSER_PAUSE
+if "%BR_ACT%"=="BLOCK" goto BROWSER_BLOCK
+if "%BR_ACT%"=="RESTORE" goto BROWSER_RESTORE
+goto MENU
+
+:BROWSER_PAUSE
+cls
+echo.
+echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
+echo %C_WHT%   ║ %C_YEL%[*] INITIATING TEMPORARY BROWSER SUSPENSION [%BR_NAME%]...            %C_WHT%║%C_RST%
+echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
+echo.
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_YEL%[KILL]%C_RST% Terminating Active %BR_NAME% Updater Processes...
+for %%P in (%BR_PROC%) do (
+    taskkill /F /IM %%P /T >nul 2>&1
+    echo [%date% %time:~0,8%] [KILL] Browser Updater: %%P -^> TERMINATED >> "%LOG_FILE%"
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Processes Terminated.
+echo.
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Stopping %BR_NAME% Updater Services...
+for %%B in (%BR_SVC%) do (
+    start "" /b sc stop %%B >nul 2>&1
+    echo [%date% %time:~0,8%] [STOP] Browser Service: %%B -^> STOPPED >> "%LOG_FILE%"
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Services Stopped.
+echo.
+echo %C_YEL%   [ℹ] NOTE: Updaters are stopped for this session but will return on PC restart.%C_RST%
+echo %C_GRN%   [✔] OPERATION COMPLETE: %BR_NAME% TEMPORARILY PAUSED.%C_RST%
+echo.
+pause
+goto MENU
+
+:BROWSER_BLOCK
+cls
+echo.
+echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
+echo %C_WHT%   ║ %C_RED%[!] WARNING: This will permanently block %BR_NAME% updates!               %C_WHT%║%C_RST%
+echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
+set "confirm="
+set /p confirm="   %C_YEL%>> Confirm? [Press ENTER, Y, or YES to proceed, any other key to cancel]: %C_RST%"
+if not defined confirm set "confirm=YES"
+set "is_yes=0"
+if /i "%confirm%"=="YES" set "is_yes=1"
+if /i "%confirm%"=="Y" set "is_yes=1"
+if "%is_yes%"=="0" (
+    echo %C_GRY%   [*] Cancelled. Returning to menu...%C_RST%
+    timeout /t 2 >nul
+    goto MENU
+)
+cls
+echo.
+echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
+echo %C_WHT%   ║ %C_RED%[*] INITIATING BULLETPROOF %BR_NAME% ELIMINATION PROTOCOL...             %C_WHT%║%C_RST%
+echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
+echo.
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_RED%[KILL]%C_RST% Hunting ^& Terminating Active %BR_NAME% Updater Processes...
+for %%P in (%BR_PROC%) do (
+    taskkill /F /IM %%P /T >nul 2>&1
+    echo [%date% %time:~0,8%] [KILL] Browser Updater: %%P -^> TERMINATED >> "%LOG_FILE%"
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Processes Terminated.
+echo.
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Disabling %BR_NAME% Updater Services...
+for %%B in (%BR_SVC%) do (
+    start "" /b sc stop %%B >nul 2>&1
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\%%B" /v Start /t REG_DWORD /d 4 /f >nul 2>&1
+    echo [%date% %time:~0,8%] [DISABLE] Browser Service: %%B -^> DISABLED >> "%LOG_FILE%"
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Services Disabled.
+echo.
+if not "%BR_TASKS%"=="" (
+    echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Eradicating %BR_NAME% Scheduled Update Tasks...
+    for %%T in (%BR_TASKS%) do (
+        schtasks /Change /TN "%%~T" /Disable >nul 2>&1
+    )
+    echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Tasks Successfully Deactivated.
+    echo.
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_YEL%[LOCK]%C_RST% Injecting Core GPO ^& IFEO Debugger Locks for %BR_NAME%...
+reg add "HKLM\SOFTWARE\Policies\%BR_GPO_KEY%" /v %BR_GPO_VAL% /t REG_DWORD /d %BR_GPO_DATA% /f >nul 2>&1
+reg add "HKLM\SOFTWARE\WOW6432Node\Policies\%BR_GPO_KEY%" /v %BR_GPO_VAL% /t REG_DWORD /d %BR_GPO_DATA% /f >nul 2>&1
+for %%X in (%BR_IFEO%) do (
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%X" /v Debugger /t REG_SZ /d "systray.exe" /f >nul 2>&1
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Policies ^& Image execution debugger traps applied.
+echo.
+echo %C_GRN%   [✔] OPERATION COMPLETE: %BR_NAME% IS NOW 100%% INCAPABLE OF UPDATING.%C_RST%
+echo.
+pause
+goto MENU
+
+:BROWSER_RESTORE
+cls
+echo.
+echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
+echo %C_WHT%   ║ %C_GRN%[*] RESTORING %BR_NAME% AUTO-UPDATE FUNCTIONALITY...                     %C_WHT%║%C_RST%
+echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
+echo.
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-Enabling %BR_NAME% Updater Services...
+if not "%BR_SVC_PRIMARY%"=="" (
+    sc config %BR_SVC_PRIMARY% start= auto >nul 2>&1
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\%BR_SVC_PRIMARY%" /v Start /t REG_DWORD /d 2 /f >nul 2>&1
+    echo [%date% %time:~0,8%] [ENABLE] Browser Service: %BR_SVC_PRIMARY% -^> AUTO >> "%LOG_FILE%"
+)
+if not "%BR_SVC_SECONDARY%"=="" (
+    sc config %BR_SVC_SECONDARY% start= demand >nul 2>&1
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\%BR_SVC_SECONDARY%" /v Start /t REG_DWORD /d 3 /f >nul 2>&1
+    echo [%date% %time:~0,8%] [ENABLE] Browser Service: %BR_SVC_SECONDARY% -^> DEMAND >> "%LOG_FILE%"
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Services Restored.
+echo.
+if not "%BR_TASKS%"=="" (
+    echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-Enabling %BR_NAME% Scheduled Tasks...
+    for %%T in (%BR_TASKS%) do (
+        schtasks /Change /TN "%%~T" /Enable >nul 2>&1
+    )
+    echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Tasks Restored.
+    echo.
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_YEL%[UNLOCK]%C_RST% Erasing GPO Locks and IFEO Debugger Traps...
+if "%BR_GPO_VAL%"=="DisableAppUpdate" (
+    reg delete "HKLM\SOFTWARE\Policies\%BR_GPO_KEY%" /v DisableAppUpdate /f >nul 2>&1
+    reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\%BR_GPO_KEY%" /v DisableAppUpdate /f >nul 2>&1
+) else (
+    reg delete "HKLM\SOFTWARE\Policies\%BR_GPO_KEY%" /f >nul 2>&1
+    reg delete "HKLM\SOFTWARE\WOW6432Node\Policies\%BR_GPO_KEY%" /f >nul 2>&1
+)
+for %%X in (%BR_IFEO%) do (
+    reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%X" /v Debugger /f >nul 2>&1
+)
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% GPO and IFEO traps removed.
+echo.
+echo %C_GRN%   [✔] OPERATION COMPLETE: %BR_NAME% CAN NOW UPDATE NORMALLY.%C_RST%
 echo.
 pause
 goto MENU
