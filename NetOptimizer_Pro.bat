@@ -21,41 +21,35 @@ set "C_GRY=%ESC%[90m"
 :: ADMINISTRATOR PRIVILEGES CHECK & ELEVATION ENGINE (v3.2)
 :: ==========================================
 net session >nul 2>&1
-if %errorlevel% NEQ 0 (
-    echo.
-    echo %C_RED%  [!] ERROR: Administrator privileges required.%C_RST%
-    echo %C_YEL%  [*] Attempting automatic elevation... please wait.%C_RST%
-    
-    set "SCRIPT_PATH=%~f0"
-    
-    :: Attempt 1: PowerShell Start-Process (Modern Windows 7/8/10/11)
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath $env:SCRIPT_PATH -Verb RunAs" 2>nul
-    if %errorlevel% EQU 0 exit /b
+if %errorlevel% EQU 0 goto ADMIN_OK
 
-    :: Attempt 2: VBScript Elevation Wrapper (If WScript is available)
-    if exist "%SystemRoot%\System32\wscript.exe" (
-        set "VBS_PATH=%temp%\netopt_getadmin.vbs"
-        (
-            echo Set UAC = CreateObject^("Shell.Application"^)
-            echo UAC.ShellExecute "%~f0", "", "", "runas", 1
-        ) > "%VBS_PATH%" 2>nul
-        if exist "%VBS_PATH%" (
-            "%SystemRoot%\System32\wscript.exe" "%VBS_PATH%" 2>nul
-            del /f /q "%VBS_PATH%" >nul 2>&1
-            exit /b
-        )
+echo.
+echo %C_RED%  [!] ERROR: Administrator privileges required.%C_RST%
+echo %C_YEL%  [*] Requesting elevation... please wait.%C_RST%
+
+set "SCRIPT_PATH=%~f0"
+
+:: Step 1: PowerShell Elevation
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath $env:SCRIPT_PATH -Verb RunAs" 2>nul
+if %errorlevel% EQU 0 exit /b
+
+:: Step 2: VBScript Elevation Fallback (If PowerShell is restricted)
+if exist "%SystemRoot%\System32\wscript.exe" (
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    echo UAC.ShellExecute "%~f0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
+    if exist "%temp%\getadmin.vbs" (
+        "%SystemRoot%\System32\wscript.exe" "%temp%\getadmin.vbs" 2>nul
+        del /f /q "%temp%\getadmin.vbs" >nul 2>&1
+        exit /b
     )
-
-    :: Attempt 3: MSHTA Fallback Elevation (For legacy systems or missing VBScript)
-    mshta vbscript:Execute("CreateObject(""Shell.Application"").ShellExecute(""%~f0"", """", """", ""runas"", 1)(window.close)") 2>nul
-    if %errorlevel% EQU 0 exit /b
-
-    echo.
-    echo %C_RED%  [!] Elevation failed or permission was denied by UAC.%C_RST%
-    echo %C_YEL%  [*] Please right-click the script and select "Run as administrator".%C_RST%
-    pause
-    exit /b
 )
+
+echo.
+echo %C_RED%  [!] Elevation refused or failed.%C_RST%
+echo %C_YEL%  [*] Please right-click the script and select "Run as administrator".%C_RST%
+echo.
+pause
+exit /b
 
 :ADMIN_OK
 cd /d "%~dp0"
@@ -94,7 +88,7 @@ if "%LATEST_VERSION%"=="" (
     goto MENU
 )
 
-if "%LATEST_VERSION%"=="%CURRENT_VERSION%" (
+if "%LATEST_VERSION%" LEQ "%CURRENT_VERSION%" (
     echo %C_GRN%  [✔] You are using the latest version ^(v%CURRENT_VERSION%^).%C_RST%
     timeout /t 2 >nul
     goto MENU
