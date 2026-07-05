@@ -2,7 +2,7 @@
 setlocal
 :: Full Support for UTF-8
 chcp 65001 >nul
-title NetOptimizer Pro v3.1 - By ALI SAKKAF
+title NetOptimizer Pro v3.2 - By ALI SAKKAF
 
 :: ==========================================
 :: ANSI COLOR ENGINE
@@ -18,26 +18,42 @@ set "C_WHT=%ESC%[97m"
 set "C_GRY=%ESC%[90m"
 
 :: ==========================================
-:: ADMINISTRATOR PRIVILEGES CHECK
+:: ADMINISTRATOR PRIVILEGES CHECK & ELEVATION ENGINE (v3.2)
 :: ==========================================
 net session >nul 2>&1
 if %errorlevel% NEQ 0 (
     echo.
-    echo %C_RED%  [!] ERROR: This script requires Administrator privileges.%C_RST%
-    echo %C_YEL%  [*] Requesting elevation... please wait.%C_RST%
+    echo %C_RED%  [!] ERROR: Administrator privileges required.%C_RST%
+    echo %C_YEL%  [*] Attempting automatic elevation... please wait.%C_RST%
     
     set "SCRIPT_PATH=%~f0"
+    
+    :: Attempt 1: PowerShell Start-Process (Modern Windows 7/8/10/11)
     powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath $env:SCRIPT_PATH -Verb RunAs" 2>nul
-    if %errorlevel% NEQ 0 (
-        echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
-        echo UAC.ShellExecute """%~f0""", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
-        "%temp%\getadmin.vbs" 2>nul
-        del "%temp%\getadmin.vbs" >nul 2>&1
-        echo.
-        echo %C_RED%  [!] Elevation refused or failed.%C_RST%
-        echo %C_YEL%  [*] Please right-click the script and select "Run as administrator".%C_RST%
-        pause
+    if %errorlevel% EQU 0 exit /b
+
+    :: Attempt 2: VBScript Elevation Wrapper (If WScript is available)
+    if exist "%SystemRoot%\System32\wscript.exe" (
+        set "VBS_PATH=%temp%\netopt_getadmin.vbs"
+        (
+            echo Set UAC = CreateObject^("Shell.Application"^)
+            echo UAC.ShellExecute "%~f0", "", "", "runas", 1
+        ) > "%VBS_PATH%" 2>nul
+        if exist "%VBS_PATH%" (
+            "%SystemRoot%\System32\wscript.exe" "%VBS_PATH%" 2>nul
+            del /f /q "%VBS_PATH%" >nul 2>&1
+            exit /b
+        )
     )
+
+    :: Attempt 3: MSHTA Fallback Elevation (For legacy systems or missing VBScript)
+    mshta vbscript:Execute("CreateObject(""Shell.Application"").ShellExecute(""%~f0"", """", """", ""runas"", 1)(window.close)") 2>nul
+    if %errorlevel% EQU 0 exit /b
+
+    echo.
+    echo %C_RED%  [!] Elevation failed or permission was denied by UAC.%C_RST%
+    echo %C_YEL%  [*] Please right-click the script and select "Run as administrator".%C_RST%
+    pause
     exit /b
 )
 
@@ -49,9 +65,9 @@ cd /d "%~dp0"
 :: ==========================================
 set "SVC_UPDATE_CORE=wuauserv bits dosvc UsoSvc"
 set "SVC_UPDATE_EXTRA=WaaSMedicSvc"
-set "SVC_TELEMETRY=DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks BcastDVRUserService BluetoothUserService RemoteRegistry wisvc Fax SensorService SensorDataService SensrSvc embeddedmode DsSvc rmsvc tzautoupdate"
+set "SVC_TELEMETRY=DiagTrack dmwappushservice PcaSvc CDPSvc WpnService NcbService InstallService MapsBroker lfsvc OneSyncSvc AppXSVC ClipSVC SysMain GamingServices GamingServicesNet XblAuthManager XblGameSave XboxNetApiSvc XboxGipSvc RetailDemo shpamsvc TroubleshootingSvc DPS WdiServiceHost WdiSystemHost diagsvc WSAIFabricSvc CaptureService SmsRouter WalletService WerSvc WSearch PhoneSvc PushToInstall diagnosticshub.standardcollector.service TrkWks BcastDVRUserService BluetoothUserService RemoteRegistry wisvc Fax SensorService SensorDataService SensrSvc embeddedmode DsSvc rmsvc tzautoupdate"
 set "SVC_BROWSERS=gupdate gupdatem braveupdate bravemupdate edgeupdate edgeupdatem MozillaMaintenance"
-set "PROC_TELEMETRY=msedgewebview2.exe OneDrive.exe Widgets.exe CompatTelRunner.exe DeviceCensus.exe software_reporter_tool.exe gamebarpresencewriter.exe PhoneExperienceHost.exe mscopilot.exe copilot_setup.exe Teams.exe cortana.exe SearchApp.exe"
+set "PROC_TELEMETRY=msedgewebview2.exe OneDrive.exe Widgets.exe CompatTelRunner.exe DeviceCensus.exe software_reporter_tool.exe gamebarpresencewriter.exe PhoneExperienceHost.exe mscopilot.exe copilot_setup.exe Teams.exe cortana.exe SearchApp.exe AiHost.exe Recall.exe WindowsRecall.exe CrossDevice.exe SearchHost.exe NewsAndInterests.exe GameBar.exe GameBarFTServer.exe wermgr.exe invagent.exe"
 set "PROC_BROWSERS=GoogleUpdate.exe BraveUpdate.exe MicrosoftEdgeUpdate.exe maintenanceservice.exe opera_autoupdate.exe updater.exe BraveUpdateOnDemand.exe BraveCrashHandler.exe BraveCrashHandler64.exe BraveCrashHandlerArm64.exe BraveUpdateBroker.exe BraveUpdateComRegisterShell64.exe BraveUpdateComRegisterShellArm64.exe BraveUpdateCore.exe remoting_crashpad_handler.exe remoting_native_messaging_host.exe remote_assistance_host_uiaccess.exe remote_open_url.exe remote_assistance_host.exe remote_security_key.exe remoting_start_host.exe remote_webauthn.exe remoting_desktop.exe remoting_host.exe elevated_tracing_service.exe mscopilot.exe elevation_service.exe msedge_pwa_launcher.exe passkey_authenticator_plugin.exe notification_helper.exe notification_click_helper.exe msedge_proxy.exe identity_helper.exe pwahelper.exe ie_to_edge_stub.exe cookie_exporter.exe copilot_setup.exe"
 
 set "LOG_DIR=%~dp0NetOptimizer_Logs"
@@ -61,7 +77,7 @@ set "LOG_FILE=%LOG_DIR%\NetOptimizer_Log.txt"
 :: ==========================================
 :: AUTO-UPDATE ENGINE (PRO)
 :: ==========================================
-set "CURRENT_VERSION=3.1"
+set "CURRENT_VERSION=3.2"
 set "SCRIPT_NAME=NetOptimizer_Pro.bat"
 set "PASTEBIN_URL=https://pastebin.com/raw/uKR3Lvhg"
 set "PS_TLS=[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;"
@@ -148,7 +164,7 @@ echo %C_RED%  ★                                                               
 echo %C_RED%  ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★%C_RST%
 echo %C_WHT%   ╔════════════════════════════════════════════════════════════════════════╗%C_RST%
 echo %C_WHT%   ║%C_YEL%              ⚡ ULTIMATE NETWORK ^& UPDATE SERVICES KILLER ⚡           %C_WHT%║%C_RST%
-echo %C_WHT%   ║%C_GRN%                    Developed By: A L I  S A K K A F  v3.1              %C_WHT%║%C_RST%
+echo %C_WHT%   ║%C_GRN%                    Developed By: A L I  S A K K A F  v3.2              %C_WHT%║%C_RST%
 echo %C_WHT%   ║%C_WHT%                    GitHub User: github.com/alisakkaf                   %C_WHT%║%C_RST%
 echo %C_WHT%   ╚════════════════════════════════════════════════════════════════════════╝%C_RST%
 echo.
@@ -278,11 +294,19 @@ echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Services Locked (Start=Dis
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Suspending Telemetry ^& Scheduled Maintenance Tasks...
-for %%T in ("Application Experience\ProgramDataUpdater" "Customer Experience Improvement Program\Consolidator" "Customer Experience Improvement Program\UsbCeip" "WindowsUpdate\Scheduled Start" "UpdateOrchestrator\Schedule Scan") do (
+for %%T in ("Application Experience\ProgramDataUpdater" "Application Experience\Microsoft Compatibility Appraiser" "Application Experience\StartupAppTask" "Customer Experience Improvement Program\Consolidator" "Customer Experience Improvement Program\UsbCeip" "Customer Experience Improvement Program\BthSQM" "WindowsUpdate\Scheduled Start" "UpdateOrchestrator\Schedule Scan" "Feedback\Siuf\DmClient" "Feedback\Siuf\DmClientOnScenarioDownload" "Maps\MapsUpdateTask" "Maps\MapsToastTask" "Windows Error Reporting\QueueReporting") do (
     schtasks /Change /TN "Microsoft\Windows\%%~T" /Disable >nul 2>&1
     echo [%date% %time:~0,8%] [TASK] Task: %%~T -^> DISABLED >> "%LOG_FILE%" 2>nul
 )
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Scheduled Tasks Disabled.
+echo.
+
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Disabling Delivery Optimization P2P ^& Background AI Queries...
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" /v DODownloadMode /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338387Enabled" /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338388Enabled" /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SilentInstalledAppsEnabled" /t REG_DWORD /d 0 /f >nul 2>&1
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Delivery Optimization ^& Background Downloads Stopped.
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Disabling Bing Search Background Network Queries...
@@ -331,10 +355,18 @@ echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Services Restored (Start=D
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-Enabling Scheduled Maintenance Tasks...
-for %%T in ("Application Experience\ProgramDataUpdater" "WindowsUpdate\Scheduled Start" "UpdateOrchestrator\Schedule Scan") do (
+for %%T in ("Application Experience\ProgramDataUpdater" "Application Experience\Microsoft Compatibility Appraiser" "Application Experience\StartupAppTask" "Customer Experience Improvement Program\Consolidator" "Customer Experience Improvement Program\UsbCeip" "Customer Experience Improvement Program\BthSQM" "WindowsUpdate\Scheduled Start" "UpdateOrchestrator\Schedule Scan" "Feedback\Siuf\DmClient" "Feedback\Siuf\DmClientOnScenarioDownload" "Maps\MapsUpdateTask" "Maps\MapsToastTask" "Windows Error Reporting\QueueReporting") do (
     schtasks /Change /TN "Microsoft\Windows\%%~T" /Enable >nul 2>&1
 )
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Tasks Restored.
+echo.
+
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Restoring Delivery Optimization P2P ^& Background Downloads...
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" /v DODownloadMode /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338387Enabled" /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338388Enabled" /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SilentInstalledAppsEnabled" /f >nul 2>&1
+echo %C_GRY%[%time:~0,8%]%C_RST% %C_GRN%[DONE]%C_RST% Delivery Optimization Restored.
 echo.
 
 echo %C_GRY%[%time:~0,8%]%C_RST% %C_CYA%[INFO]%C_RST% Re-enabling Bing Search Start Menu Queries...
