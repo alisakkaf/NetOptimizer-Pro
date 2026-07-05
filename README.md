@@ -7,7 +7,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 ![Safety](https://img.shields.io/badge/Safety-100%25_Reversible-orange?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-v3.1-red?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-v3.2-red?style=for-the-badge)
 
 <br>
 
@@ -17,11 +17,13 @@
 
 ---
 
-## 🆕 What's New in Version 3.1 (Recent Updates)
+## 🆕 What's New in Version 3.2 (Recent Updates)
 
-* **🌐 Targeted Browser Update Controls:** Introducing a common sub-menu when choosing Option [5] Temporary Pause, [6] Permanent Block, or [7] Restore Defaults. You can now target Chrome, Edge, Brave, or Firefox individually, or choose "ALL Browsers" to process them collectively.
-* **🔒 Dynamic Resource Lockdown:** Registry policies, services, GPO rules, scheduled tasks, and IFEO debugger blocks are applied specifically per-browser to guarantee zero impact on non-selected browsers.
-* **🛡️ Full Edition Synchronization:** Feature parity between the Pro (ANSI color + Emojis) and Lite (plain ASCII text) editions, with no global Delayed Expansion and complete compatibility with Windows 7/8/10/11.
+* **🛑 Expanded Network-Hungry Services Purge:** Expanded Option [1] to cover modern Windows 10/11 network-hungry background services (including Xbox Live networking, Diagnostic Frameworks `DPS`/`diagsvc`/`Wdi`, Windows AI Fabric `WSAIFabricSvc`, Data Sharing, and Troubleshooting).
+* **🧠 Modern AI & Telemetry Process Termination:** Added force-killing of memory-resident background network hogs including `AiHost.exe`, `Recall.exe`, `CrossDevice.exe`, `SearchHost.exe`, and `NewsAndInterests.exe`.
+* **📦 Delivery Optimization & Spotlight Policies:** Added registry policy blocks for Delivery Optimization P2P uploads (`DODownloadMode=0`) and background Spotlight / suggested app network queries.
+* **🔑 3-Tier Resilient UAC Elevation Engine:** Implemented a multi-stage elevation fallback (PowerShell -> VBScript wrapper with `wscript.exe` check -> MSHTA inline elevation) ensuring 100% elevation success across Windows 7 to Windows 11 (including Windows 11 24H2+ builds where VBScript is an uninstalled feature).
+* **🟢 100% Synchronized Restoration:** Option [2] cleanly restores all newly added services, scheduled tasks, and registry policies back to native default states.
 
 
 ---
