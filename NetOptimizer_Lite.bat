@@ -8,41 +8,35 @@ title NetOptimizer Lite v3.2 - By ALI SAKKAF
 :: ADMINISTRATOR PRIVILEGES CHECK & ELEVATION ENGINE (v3.2)
 :: ==========================================
 net session >nul 2>&1
-if %errorlevel% NEQ 0 (
-    echo.
-    echo   [!] ERROR: Administrator privileges required.
-    echo   [*] Attempting automatic elevation... please wait.
-    
-    set "SCRIPT_PATH=%~f0"
-    
-    :: Attempt 1: PowerShell Start-Process (Modern Windows 7/8/10/11)
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath $env:SCRIPT_PATH -Verb RunAs" 2>nul
-    if %errorlevel% EQU 0 exit /b
+if %errorlevel% EQU 0 goto ADMIN_OK
 
-    :: Attempt 2: VBScript Elevation Wrapper (If WScript is available)
-    if exist "%SystemRoot%\System32\wscript.exe" (
-        set "VBS_PATH=%temp%\netopt_getadmin.vbs"
-        (
-            echo Set UAC = CreateObject^("Shell.Application"^)
-            echo UAC.ShellExecute "%~f0", "", "", "runas", 1
-        ) > "%VBS_PATH%" 2>nul
-        if exist "%VBS_PATH%" (
-            "%SystemRoot%\System32\wscript.exe" "%VBS_PATH%" 2>nul
-            del /f /q "%VBS_PATH%" >nul 2>&1
-            exit /b
-        )
+echo.
+echo   [!] ERROR: Administrator privileges required.
+echo   [*] Requesting elevation... please wait.
+
+set "SCRIPT_PATH=%~f0"
+
+:: Step 1: PowerShell Elevation
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath $env:SCRIPT_PATH -Verb RunAs" 2>nul
+if %errorlevel% EQU 0 exit /b
+
+:: Step 2: VBScript Elevation Fallback (If PowerShell is restricted)
+if exist "%SystemRoot%\System32\wscript.exe" (
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    echo UAC.ShellExecute "%~f0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
+    if exist "%temp%\getadmin.vbs" (
+        "%SystemRoot%\System32\wscript.exe" "%temp%\getadmin.vbs" 2>nul
+        del /f /q "%temp%\getadmin.vbs" >nul 2>&1
+        exit /b
     )
-
-    :: Attempt 3: MSHTA Fallback Elevation (For legacy systems or missing VBScript)
-    mshta vbscript:Execute("CreateObject(""Shell.Application"").ShellExecute(""%~f0"", """", """", ""runas"", 1)(window.close)") 2>nul
-    if %errorlevel% EQU 0 exit /b
-
-    echo.
-    echo   [!] Elevation failed or permission was denied by UAC.
-    echo   [*] Please right-click the script and select "Run as administrator".
-    pause
-    exit /b
 )
+
+echo.
+echo   [!] Elevation refused or failed.
+echo   [*] Please right-click the script and select "Run as administrator".
+echo.
+pause
+exit /b
 
 :ADMIN_OK
 cd /d "%~dp0"
@@ -72,7 +66,7 @@ echo.
 echo   [*] Checking for updates... (Timeout in 5s)
 
 set "LATEST_VERSION="
-for /f "delims=" %%V in ('powershell -NoProfile -Command "[System.Net.ServicePointManager]::SecurityProtocol=[System.Net.SecurityProtocolType]::Tls12; $req=[System.Net.WebRequest]::Create('%PASTEBIN_URL%'); $req.Timeout=5000; $res=$req.GetResponse(); $sr=New-Object System.IO.StreamReader($res.GetResponseStream()); $sr.ReadToEnd().Trim()" 2^>nul') do set "LATEST_VERSION=%%V"
+for /f "delims=" %%V in ('powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadString('%PASTEBIN_URL%').Trim()" 2^>nul') do set "LATEST_VERSION=%%V"
 
 if "%LATEST_VERSION%"=="" (
     echo   [!] Server unreachable or check timed out. Proceeding to menu...
@@ -80,8 +74,8 @@ if "%LATEST_VERSION%"=="" (
     goto MENU
 )
 
-if "%LATEST_VERSION%"=="%CURRENT_VERSION%" (
-    echo   [SUCCESS] Your version is up to date (v%CURRENT_VERSION%).
+if "%LATEST_VERSION%" LEQ "%CURRENT_VERSION%" (
+    echo   [SUCCESS] Your version is up to date [v%CURRENT_VERSION%].
     timeout /t 2 >nul
     goto MENU
 )
