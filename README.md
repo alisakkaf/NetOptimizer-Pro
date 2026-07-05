@@ -4,6 +4,7 @@
 **The Ultimate Windows Network Debloater, Telemetry Purger & Bandwidth Optimizer**
 
 ![Platform](https://img.shields.io/badge/Platform-Windows_7%20%7C%208%20%7C%2010%20%7C%2011-blue?style=for-the-badge)
+![Downloads](https://img.shields.io/github/downloads/alisakkaf/NetOptimizer-Pro/total?style=for-the-badge&logo=github&color=blueviolet)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 ![Safety](https://img.shields.io/badge/Safety-100%25_Reversible-orange?style=for-the-badge)
