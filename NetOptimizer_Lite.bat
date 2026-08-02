@@ -227,11 +227,14 @@ for %%P in (%PROC_TELEMETRY%) do (
 echo [+] DONE.
 echo.
 
-echo [INFO] Clearing Active BITS Transfer Queues ^& Stopping Core Update Engines...
+echo [INFO] Clearing Active BITS Transfer Queues ^& Resetting SCM Failure Recovery Actions...
 bitsadmin /reset /allusers >nul 2>&1
+powershell -NoProfile -Command "Import-Module BitsTransfer -ErrorAction SilentlyContinue; Get-BitsTransfer -AllUsers -ErrorAction SilentlyContinue | Remove-BitsTransfer -ErrorAction SilentlyContinue" >nul 2>&1
 for %%S in (%SVC_UPDATE_CORE% %SVC_UPDATE_EXTRA%) do (
     start "" /b sc stop %%S >nul 2>&1
-    echo [%date% %time:~0,8%] [STOP] Service: %%S -^> STOPPED >> "%LOG_FILE%" 2>nul
+    sc config %%S start= disabled >nul 2>&1
+    sc failure %%S reset= 0 actions= "" >nul 2>&1
+    echo [%date% %time:~0,8%] [STOP] Service: %%S -^> STOPPED ^& DISABLED >> "%LOG_FILE%" 2>nul
 )
 echo [+] DONE.
 echo.
@@ -239,12 +242,14 @@ echo.
 echo [INFO] Stopping Telemetry, Sync, Error Reporting ^& App Store Services...
 for %%S in (%SVC_TELEMETRY%) do (
     start "" /b sc stop %%S >nul 2>&1
-    echo [%date% %time:~0,8%] [STOP] Service: %%S -^> STOPPED >> "%LOG_FILE%" 2>nul
+    sc config %%S start= disabled >nul 2>&1
+    sc failure %%S reset= 0 actions= "" >nul 2>&1
+    echo [%date% %time:~0,8%] [STOP] Service: %%S -^> STOPPED ^& DISABLED >> "%LOG_FILE%" 2>nul
 )
 echo [+] DONE.
 echo.
 
-echo [INFO] Permanently Disabling Services from Auto-Start...
+echo [INFO] Hard Locking Service Registry Keys ^& Applying SCM Locks...
 for %%S in (%SVC_UPDATE_CORE% %SVC_TELEMETRY%) do (
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\%%S" /v Start /t REG_DWORD /d 4 /f >nul 2>&1
     if not errorlevel 1 (
@@ -254,11 +259,7 @@ for %%S in (%SVC_UPDATE_CORE% %SVC_TELEMETRY%) do (
     )
 )
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\%SVC_UPDATE_EXTRA%" /v Start /t REG_DWORD /d 4 /f >nul 2>&1
-if not errorlevel 1 (
-    echo [%date% %time:~0,8%] [DISABLE] Service: %SVC_UPDATE_EXTRA% -^> DISABLED >> "%LOG_FILE%" 2>nul
-) else (
-    echo [%date% %time:~0,8%] [DISABLE_FAILED] Service: %SVC_UPDATE_EXTRA% -^> Permission Denied/Missing >> "%LOG_FILE%" 2>nul
-)
+powershell -NoProfile -Command "Get-Service bits,dosvc,wuauserv,UsoSvc,WaaSMedicSvc -ErrorAction SilentlyContinue | Stop-Service -Force -ErrorAction SilentlyContinue; Get-Service bits,dosvc,wuauserv,UsoSvc,WaaSMedicSvc -ErrorAction SilentlyContinue | Set-Service -StartupType Disabled -ErrorAction SilentlyContinue" >nul 2>&1
 echo [+] DONE.
 echo.
 
@@ -270,10 +271,23 @@ for %%T in ("Application Experience\ProgramDataUpdater" "Application Experience\
 echo [+] DONE.
 echo.
 
-echo [INFO] Disabling Delivery Optimization P2P, BITS Limits ^& Background AI Queries...
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" /v DODownloadMode /t REG_DWORD /d 0 /f >nul 2>&1
-reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /v DODownloadMode /t REG_DWORD /d 0 /f >nul 2>&1
+echo [INFO] Applying Group Policy Locks for BITS, Windows Update ^& Delivery Optimization...
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\BITS" /v EnableBITSMaxBandwidth /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\BITS" /v MaxDownloadBandwidth /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\BITS" /v UseBITS /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\BITS" /v JobInactivityTimeout /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" /v DODownloadMode /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" /v DOMaxBackgroundDownloadBandwidth /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" /v DOMaxForegroundDownloadBandwidth /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /v DODownloadMode /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /v DownloadMode /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DoNotConnectToWindowsUpdateInternetLocations /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DisableWindowsUpdateAccess /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v AUOptions /t REG_DWORD /d 2 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\WindowsStore" /v AutoDownload /t REG_DWORD /d 2 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\WindowsStore" /v DisableAutoInstall /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338387Enabled" /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338388Enabled" /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SilentInstalledAppsEnabled" /t REG_DWORD /d 0 /f >nul 2>&1
@@ -315,11 +329,15 @@ echo [*] RESTORING SYSTEM SERVICES TO DEFAULT CONFIGURATION...
 echo ==============================================================================
 echo.
 
-echo [INFO] Restoring Service Startup Types...
+echo [INFO] Restoring Service Startup Types ^& SCM Recovery Actions...
 for %%S in (%SVC_UPDATE_CORE% %SVC_TELEMETRY%) do (
+    sc config %%S start= demand >nul 2>&1
+    sc failure %%S reset= 86400 actions= restart/60000 >nul 2>&1
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\%%S" /v Start /t REG_DWORD /d 3 /f >nul 2>&1
     echo [%date% %time:~0,8%] [ENABLE] Service: %%S -^> DEMAND >> "%LOG_FILE%"
 )
+sc config %SVC_UPDATE_EXTRA% start= demand >nul 2>&1
+sc failure %SVC_UPDATE_EXTRA% reset= 86400 actions= restart/60000 >nul 2>&1
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\%SVC_UPDATE_EXTRA%" /v Start /t REG_DWORD /d 3 /f >nul 2>&1
 echo [%date% %time:~0,8%] [ENABLE] Service: %SVC_UPDATE_EXTRA% -^> DEMAND >> "%LOG_FILE%"
 echo [+] DONE.
@@ -332,10 +350,15 @@ for %%T in ("Application Experience\ProgramDataUpdater" "Application Experience\
 echo [+] DONE.
 echo.
 
-echo [INFO] Restoring Delivery Optimization P2P ^& Background Downloads...
-reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" /v DODownloadMode /f >nul 2>&1
+echo [INFO] Removing Group Policy Locks for BITS, Windows Update ^& Delivery Optimization...
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\BITS" /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" /f >nul 2>&1
 reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /v DODownloadMode /f >nul 2>&1
-reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\BITS" /v EnableBITSMaxBandwidth /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /v DownloadMode /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\WindowsStore" /v AutoDownload /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\WindowsStore" /v DisableAutoInstall /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338387Enabled" /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338388Enabled" /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SilentInstalledAppsEnabled" /f >nul 2>&1
