@@ -8,7 +8,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 ![Safety](https://img.shields.io/badge/Safety-100%25_Reversible-orange?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-v3.2-red?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-v3.3-red?style=for-the-badge)
 
 <br>
 
@@ -18,13 +18,13 @@
 
 ---
 
-## 🆕 What's New in Version 3.2 (Recent Updates)
+## 🆕 What's New in Version 3.3 (Recent Updates)
 
-* **🛑 Expanded Network-Hungry Services Purge:** Expanded Option [1] to cover modern Windows 10/11 network-hungry background services (including Xbox Live networking, Diagnostic Frameworks `DPS`/`diagsvc`/`Wdi`, Windows AI Fabric `WSAIFabricSvc`, Data Sharing, and Troubleshooting).
-* **🧠 Modern AI & Telemetry Process Termination:** Added force-killing of memory-resident background network hogs including `AiHost.exe`, `Recall.exe`, `CrossDevice.exe`, `SearchHost.exe`, and `NewsAndInterests.exe`.
-* **📦 Delivery Optimization & Spotlight Policies:** Added registry policy blocks for Delivery Optimization P2P uploads (`DODownloadMode=0`) and background Spotlight / suggested app network queries.
-* **🔑 3-Tier Resilient UAC Elevation Engine:** Implemented a multi-stage elevation fallback (PowerShell -> VBScript wrapper with `wscript.exe` check -> MSHTA inline elevation) ensuring 100% elevation success across Windows 7 to Windows 11 (including Windows 11 24H2+ builds where VBScript is an uninstalled feature).
-* **🟢 100% Synchronized Restoration:** Option [2] cleanly restores all newly added services, scheduled tasks, and registry policies back to native default states.
+* **🛑 Comprehensive BITS & Delivery Optimization Purge:** Added `bitsadmin /reset /allusers` to wipe all pending background download queues, preventing BITS from auto-restarting background transfers, along with registry policy locks for Delivery Optimization P2P uploads (`DODownloadMode=0`) and BITS bandwidth limits.
+* **⚡ Post-Format & Post-Update Services Purge:** Expanded Option [1] to cover additional background network services active after fresh OS installs and Windows updates (including `WebClient`, `CsysSpSvc`, `p2psvc`, `PNRPsvc`, `wercplsupport`, `dmsvc`, `wbengine`, `fhsvc`, and `MSiSCSI`).
+* **🌐 Edge WebView2 & Browser Hogs Killing:** Expanded RAM process termination for background browser hogs including `msedgewebview2.exe`, `MicrosoftEdgeUpdate.exe`, `GoogleUpdate.exe`, `msedge.exe`, and `pwahelper.exe`.
+* **📅 21 Suspended Maintenance Tasks:** Suspended 21 background scheduled tasks (including UpdateOrchestrator, DiskDiagnostics, NetTrace, SpeechModelDownload, and LanguageComponentsInstaller).
+* **🟢 100% Synchronized Restoration:** Option [2] (Restore Services) cleanly restores all newly added services, scheduled tasks, and registry policies back to native default states.
 
 
 ---
